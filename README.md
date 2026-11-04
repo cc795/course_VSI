@@ -34,41 +34,94 @@ The paper's resolution estimates are internally inconsistent: 448 cells across a
 | [`scripts/validate.py`](scripts/validate.py) | Check equilibrium initialization, cooling, and restart consistency. |
 | [`scripts/plot_style.py`](scripts/plot_style.py) | Configure Times-style typography. |
 
-## Build and run
+## Run locally on macOS
 
-Requirements: g++, make, Python 3, NumPy, Matplotlib, and a Times-family font. Movie encoding additionally requires FFmpeg.
+Run the following commands in macOS Terminal, in order, using the same terminal session. Homebrew must be installed. These commands use Homebrew GCC for OpenMP support and launch Athena++ directly, avoiding the Linux-specific `flock` dependency in the shell runner.
 
-The upstream Athena++ revision is pinned to `053bc738d5c85dac717326b4338b34c7db4e715d`. The build script copies the standalone problem generator into the Athena++ checkout without changing `disk.cpp` or the solver.
+### 1. Install dependencies
 
 ```bash
+brew install gcc python ffmpeg
+```
+
+### 2. Download the repositories and prepare Python
+
+```bash
+mkdir -p ~/vsi
+cd ~/vsi
+
 git clone https://github.com/cc795/course_VSI.git
-cd course_VSI
-export ATHENA_DIR="$PWD/../athena"
-bash scripts/build.sh
-bash scripts/run_figure2.sh
+git clone https://github.com/PrincetonUniversity/athena.git
+
+python3 -m venv vsi-venv
+source vsi-venv/bin/activate
+python -m pip install numpy matplotlib
+
+export ATHENA_DIR="$HOME/vsi/athena"
+export PROJECT_DIR="$HOME/vsi/course_VSI"
 ```
 
-Set `ATHENA_DIR` to the desired Athena++ checkout location. The build script creates the checkout if it does not exist and verifies the pinned revision.
+If either repository already exists, reuse its checkout instead of cloning it again.
 
-The runner prevents duplicate runs in the same output directory and supports resuming from a restart file. The input targets 500 P0, with full VTK snapshots every 1 P0, restart files every 10 P0, and history records every 0.1 P0. Reported simulation time is in code units; divide by `2π` to express it in P0.
+### 3. Compile Athena++
 
-## Plotting and movies
+```bash
+cd "$ATHENA_DIR"
 
-The static Figure 2 plot shows a signed logarithmic map of `vz/cs` and a meridional velocity-vector panel. The coordinate transformation uses spherical volume-averaged cell centers:
+git checkout 053bc738d5c85dac717326b4338b34c7db4e715d
+cp "$PROJECT_DIR/src/svanberg.cpp" src/pgen/
 
-```text
-vz = vr cos(theta) − vtheta sin(theta)
-vR = vr sin(theta) + vtheta cos(theta)
+GXX="$(find "$(brew --prefix gcc)/bin" -name 'g++-[0-9]*' | head -n 1)"
+
+python configure.py \
+  --prob=svanberg \
+  --coord=spherical_polar \
+  --eos=adiabatic \
+  --flux=hllc \
+  --cxx=g++ \
+  --ccmd="$GXX" \
+  -omp
+
+make -j4
+
+mkdir -p "$PROJECT_DIR/bin"
+cp bin/athena "$PROJECT_DIR/bin/"
 ```
 
-The movie uses a single flow panel with a dark background and a cyan–true-red signed logarithmic colormap. Color limits and coordinate ranges remain fixed across frames. Titles display the nominal integer orbit; actual snapshot times are retained in the metadata. Regular snapshots are written on the first timestep that reaches or crosses each scheduled time.
+### 4. Run a 200-step smoke test
 
-Each snapshot is displayed for **0.25 seconds**. Encoding is H.264 at `1440×960` and 24 fps. Frames follow the contiguous sequence `0,1,2,…`, stopping at the first missing orbit. The movie uses simulation data without temporal interpolation. Rendered frames and clips are cached for incremental updates.
+```bash
+cd "$PROJECT_DIR"
+mkdir -p results/mac_test
 
-Titles, tick labels, and mathematical expressions use Times-style typography, preferring Times New Roman and falling back to the Times-compatible Nimbus Roman font.
+OMP_NUM_THREADS=4 bin/athena \
+  -i inputs/athinput.figure2 \
+  -d results/mac_test \
+  time/nlim=200
+```
 
-- [Download the uploaded MP4](media/figure2_evolution.mp4)
-- [View the style preview](media/figure2_preview.png)
-- [Inspect frame times and data provenance](media/movie_metadata.json)
+A successful run ends with `Terminating on cycle limit`.
 
-The frame metadata describes the time range included in the uploaded movie. Generated simulation data and build products are excluded from version control.
+### 5. Run the full simulation in the background
+
+Start this command once, using an output directory that is not being used by another simulation:
+
+```bash
+mkdir -p "$PROJECT_DIR/results/figure2"
+
+OMP_NUM_THREADS=4 nohup caffeinate -i \
+  "$PROJECT_DIR/bin/athena" \
+  -i "$PROJECT_DIR/inputs/athinput.figure2" \
+  -d "$PROJECT_DIR/results/figure2" \
+  > "$PROJECT_DIR/results/figure2/run.log" 2>&1 &
+```
+
+This runs to **500 P0** with four OpenMP threads. Full flow snapshots are saved every 1 P0. The `caffeinate -i` command prevents idle sleep while the simulation runs; keep a laptop connected to power with its lid open.
+
+### 6. Monitor progress
+
+```bash
+tail -f ~/vsi/course_VSI/results/figure2/run.log
+```
+
+Press `Control+C` to stop viewing the log; the background simulation continues. Divide the logged `time` by `2π` to obtain the elapsed simulation time in P0.
