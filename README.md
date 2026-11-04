@@ -12,7 +12,7 @@ Use this problem generator with the official [Athena++ code](https://github.com/
 
 [Read the Section 3 implementation guide (PDF, Chinese)](readme.pdf).
 
-## Physical and numerical setup
+## Numerical setup
 
 - Spherical polar coordinates `(r, theta, phi)`, axisymmetry (`nx3=1`), no magnetic field, and no explicit viscosity.
 - `GM = R0 = rho0 = 1`, `P0 = 2π`, `gamma = 7/5`, and `h = 0.05`.
