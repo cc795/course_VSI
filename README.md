@@ -16,53 +16,48 @@ Use this problem generator with the official [Athena++ code](https://github.com/
 
 ## Physical setup
 
-The disc is vertically isothermal, with cylindrical radius $R=r\sin\theta$, height $z=r\cos\theta$, and spherical radius $r=\sqrt{R^2+z^2}$. The prescribed mid-plane density and local isothermal sound speed are
+The disc is vertically isothermal, with cylindrical radius $`R=r\sin\theta`$, height $`z=r\cos\theta`$, and spherical radius $`r=\sqrt{R^2+z^2}`$. The prescribed mid-plane density and local isothermal sound speed are
 
-$$
+```math
 \rho_{\mathrm{mid}}(R)=\rho_0\left(\frac{R}{R_0}\right)^{-q_D},
 \qquad
 c_s^2(R)=c_0^2\left(\frac{R}{R_0}\right)^{-q_T}.
-$$
+```
 
-We use $q_D=2$, $q_T=1$, $h=H/R=0.05$, and $GM=R_0=\rho_0=1$, giving $c_0=0.05$ and $c_s^2(R)=0.0025/R$.
+We use $`q_D=2`$, $`q_T=1`$, $`h=H/R=0.05`$, and $`GM=R_0=\rho_0=1`$, giving $`c_0=0.05`$ and $`c_s^2(R)=0.0025/R`$.
 
 ### Equilibrium density — equation (24)
 
 Vertical hydrostatic balance in the stellar potential gives
 
-$$
+```math
 \rho(R,z)=\rho_0\left(\frac{R}{R_0}\right)^{-q_D}
 \exp\left[\frac{GM}{c_s^2(R)}\left(\frac{1}{r}-\frac{1}{R}\right)\right].
-\tag{24}
-$$
+```
 
-This profile is implemented by `DenProfileCyl()` in [`src/svanberg.cpp`](src/svanberg.cpp#L206), using `PoverR()` for $c_s^2(R)$. The equilibrium pressure is $P=\rho c_s^2(R)$.
+This profile is implemented by `DenProfileCyl()` in [`src/svanberg.cpp`](src/svanberg.cpp#L206), using `PoverR()` for $`c_s^2(R)`$. The equilibrium pressure is $`P=\rho c_s^2(R)`$.
 
 ### Equilibrium rotation — equation (25)
 
-The angular velocity includes radial pressure support and vertical shear:
+With $`\Omega_K(R)=\sqrt{GM/R^3}`$, the angular velocity includes radial pressure support and vertical shear:
 
-$$
+```math
 \Omega(R,z)=\Omega_K(R)
-\left[-(q_D+q_T)h^2+(1-q_T)+q_T\frac{R}{r}\right]^{1/2},
-\qquad \Omega_K(R)=\sqrt{\frac{GM}{R^3}}.
-\tag{25}
-$$
+\left[-(q_D+q_T)h^2+(1-q_T)+q_T\frac{R}{r}\right]^{1/2}.
+```
 
-`VelProfileCyl()` in [`src/svanberg.cpp`](src/svanberg.cpp#L228) returns the azimuthal linear velocity $v_\phi=R\Omega$. For the adopted parameters, $v_\phi=\sqrt{GM/R}\sqrt{-3h^2+R/r}$. The unperturbed meridional velocities are $v_r=v_\theta=0$.
+`VelProfileCyl()` in [`src/svanberg.cpp`](src/svanberg.cpp#L228) returns the azimuthal linear velocity $`v_\phi=R\Omega`$. For the adopted parameters, $`v_\phi=\sqrt{GM/R}\sqrt{-3h^2+R/r}`$. The unperturbed meridional velocities are $`v_r=v_\theta=0`$.
 
 ### Thermal relaxation — equation (27)
 
-The gas temperature relaxes toward the prescribed local equilibrium temperature $T_0(R)$:
+With $`\tau=10^{-10}P_0`$, the gas temperature relaxes toward the prescribed local equilibrium temperature $`T_0(R)`$:
 
-$$
+```math
 \Delta T=\left[T_0(R)-T\right]
-\left[1-\exp\left(-\frac{\Delta t}{\tau}\right)\right],
-\qquad \tau=10^{-10}P_0.
-\tag{27}
-$$
+\left[1-\exp\left(-\frac{\Delta t}{\tau}\right)\right].
+```
 
-`MeshBlock::UserWorkInLoop()` in [`src/svanberg.cpp`](src/svanberg.cpp#L515) implements this exponential update through the internal energy, whose target is $\rho c_s^2(R)/(\gamma-1)$ with $\gamma=7/5$. Density and momentum remain unchanged during the relaxation step, and the original kinetic energy is retained when reconstructing the total energy. The very short relaxation time maintains the locally isothermal temperature profile.
+`MeshBlock::UserWorkInLoop()` in [`src/svanberg.cpp`](src/svanberg.cpp#L515) implements this exponential update through the internal energy, whose target is $`\rho c_s^2(R)/(\gamma-1)`$ with $`\gamma=7/5`$. Density and momentum remain unchanged during the relaxation step, and the original kinetic energy is retained when reconstructing the total energy. The very short relaxation time maintains the locally isothermal temperature profile.
 
 ## Numerical setup
 
