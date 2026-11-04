@@ -71,19 +71,24 @@ def main():
     if not data or len(data)-1<a.min_last: raise ValueError(f'Only {len(data)} contiguous snapshots available')
     out=root/'results/movie_figure2';out.mkdir(exist_ok=True)
     frames=out/'frames_neon_times_red_v4';frames.mkdir(exist_ok=True)
-    clips=out/'clips_neon_times_red_v4_fast';clips.mkdir(exist_ok=True)
+    clips=out/'clips_neon_times_red_v4_double_speed';clips.mkdir(exist_ok=True)
     metadata=[]
     for n,(directory,number,time) in enumerate(data):
         png=frames/f'frame_{n:04d}.png';clip=clips/f'clip_{n:04d}.mp4';meta=frames/f'frame_{n:04d}.json'
         if not clip.exists():
-            info=render(directory,number,time,n,png)
-            subprocess.run(['ffmpeg','-v','error','-y','-loop','1','-framerate','24','-i',str(png),'-frames:v','6','-c:v','libx264','-threads','1','-crf','18','-preset','fast','-pix_fmt','yuv420p',str(clip)],check=True)
+            if png.exists() and meta.exists():
+                info=json.loads(meta.read_text())
+            else:
+                info=render(directory,number,time,n,png)
+            tmp_clip=clip.with_suffix('.tmp.mp4')
+            subprocess.run(['ffmpeg','-v','error','-y','-loop','1','-framerate','24','-i',str(png),'-frames:v','3','-c:v','libx264','-threads','1','-crf','18','-preset','fast','-pix_fmt','yuv420p',str(tmp_clip)],check=True)
+            os.replace(tmp_clip,clip)
             meta.write_text(json.dumps(info,indent=2)+'\n')
         metadata.append(json.loads(meta.read_text()))
     concat=out/'clips.txt';concat.write_text(''.join(f"file '{clips/f'clip_{n:04d}.mp4'}'\n" for n in range(len(data))))
     tmp=out/'figure2_evolution.tmp.mp4';target=out/'figure2_evolution.mp4'
-    subprocess.run(['ffmpeg','-v','error','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy','-movflags','+faststart',str(tmp)],check=True)
+    subprocess.run(['ffmpeg','-v','error','-xerror','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy','-movflags','+faststart',str(tmp)],check=True)
     os.replace(tmp,target)
-    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':0.25,'style':'neon_single_panel_times_red_v4','frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
-    print(f'{target}: orbits 0..{len(data)-1}, duration {len(data)*.25:g} seconds',flush=True)
+    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':0.125,'style':'neon_single_panel_times_red_v4','frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
+    print(f'{target}: orbits 0..{len(data)-1}, duration {len(data)*.125:g} seconds',flush=True)
 if __name__=='__main__': main()
