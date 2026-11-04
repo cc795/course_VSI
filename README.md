@@ -33,3 +33,7 @@ The paper's resolution estimates are internally inconsistent: 448 cells across a
 | [`scripts/run_movie_data.sh`](scripts/run_movie_data.sh) | Generate supplemental early-time snapshots. |
 | [`scripts/validate.py`](scripts/validate.py) | Check equilibrium initialization, cooling, and restart consistency. |
 | [`scripts/plot_style.py`](scripts/plot_style.py) | Configure Times-style typography. |
+
+## Movie
+
+[Watch or download the movie](media/figure2_evolution.mp4).
