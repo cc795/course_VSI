@@ -43,7 +43,8 @@ The upstream Athena++ revision is pinned to `053bc738d5c85dac717326b4338b34c7db4
 ```bash
 git clone https://github.com/cc795/course_VSI.git
 cd course_VSI
-ATHENA_DIR="$PWD/../athena" bash scripts/build.sh
+export ATHENA_DIR="$PWD/../athena"
+bash scripts/build.sh
 bash scripts/run_figure2.sh
 ```
 
