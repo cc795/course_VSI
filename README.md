@@ -34,7 +34,7 @@ nohup bash scripts/run_figure2.sh > results/figure2/run.log 2>&1 < /dev/null &
 
 runner 用锁防止同目录重复运行；若中断，重新执行同一命令会从 final 或最近的编号 restart 文件续算。运行中的进程不保证随云环境休眠或重启保留。使用现有 checkout；除非用户明确要求，不创建 Git worktree。
 
-输入文件 `inputs/athinput.figure2` 默认运行至 500P0。每 50P0 输出完整 VTK，每 10P0 保存重启，每 0.1P0 输出 history。达到目标后自动生成：
+输入文件 `inputs/athinput.figure2` 默认运行至 500P0。每 1P0 输出完整 VTK（当前从约 10P0 的检查点切换，之前时段没有每轨道快照），每 10P0 保存重启，每 0.1P0 输出 history。达到目标后自动生成：
 
 - `results/figure2/figure2.png`：双面板图；左侧带符号对数色标表示 vz/cs，右侧为 (vR,vz)/cs 箭头。
 - `results/figure2/diagnostics.json`：目标时间、网格、冷却偏差及内盘 vz/cs RMS。
@@ -51,7 +51,7 @@ tail -n 5 results/figure2/run.log
 手工重画（仅在目标快照已产生后）：
 
 ```bash
-python3 scripts/plot_figure2.py results/figure2 --number 10 --require-target --output results/figure2/figure2.png
+python3 scripts/plot_figure2.py results/figure2 --require-target --output results/figure2/figure2.png
 ```
 
 坐标使用球坐标体积平均中心，vz=vr cos(theta)−vtheta sin(theta)，vR=vr sin(theta)+vtheta cos(theta)。读取及检查所有径向分块；VTK 存储为单精度，不改变求解器双精度计算。

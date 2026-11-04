@@ -32,8 +32,12 @@ def load(directory, number):
     return rf,tf,d,times[0]
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('directory');p.add_argument('--number',type=int,default=10)
+    p=argparse.ArgumentParser();p.add_argument('directory');p.add_argument('--number',type=int,default=None)
     p.add_argument('--output',default='figure2.png');p.add_argument('--require-target',action='store_true');a=p.parse_args()
+    if a.number is None:
+        files=list(Path(a.directory).glob('vsi.block0.out1.*.vtk'))
+        if not files: raise ValueError('No snapshots found')
+        a.number=max(int(f.name.split('.')[-2]) for f in files)
     rf,tf,d,time=load(a.directory,a.number)
     if a.require_target and not np.isclose(time,500*2*np.pi,rtol=2e-6):
         raise ValueError(f'Not the Figure 2 target time: {time/(2*np.pi)} orbits')

@@ -48,7 +48,7 @@ tau = 6.283185307179586e-10
 <output1>
 file_type = vtk
 variable = prim
-dt = 314.1592653589793
+dt = 6.283185307179586
 <output2>
 file_type = rst
 dt = 62.83185307179586
