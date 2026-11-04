@@ -12,8 +12,6 @@ Use this problem generator with the official [Athena++ code](https://github.com/
 /path/to/athena/bin/athena -i /path/to/course_VSI/inputs/athinput.figure2
 ```
 
-The implementation uses Athena++ revision `053bc738d5c85dac717326b4338b34c7db4e715d`.
-
 [Read the Section 3 implementation guide (PDF, Chinese)](readme.pdf).
 
 ## Physical and numerical setup
