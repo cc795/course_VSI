@@ -118,6 +118,43 @@ $$
 
 这对应 `DenProfileCyl()`。远离中面时 $r>R$，指数为负，密度随高度下降。压强取 $P=\rho c_s^2(R)$。
 
+### 式 (24) 对应的实际 C++ 代码
+
+下面摘录 `src/svanberg.cpp` 中的真实函数，仅调整较长行的换行。函数中的 `rad` 是柱半径 $R$，不是球半径 $r$。
+
+```cpp
+Real PoverR(const Real rad, const Real phi, const Real z) {
+  Real poverr;
+  poverr = p0_over_r0*std::pow(rad/r0, pslope);
+  return poverr;
+}
+
+Real DenProfileCyl(const Real rad, const Real phi, const Real z) {
+  Real den;
+  Real p_over_r = p0_over_r0;
+  if (NON_BAROTROPIC_EOS)
+    p_over_r = PoverR(rad, phi, z);
+  Real denmid = rho0*std::pow(rad/r0,dslope);
+  Real dentem = denmid*std::exp(
+      gm0/p_over_r*(1./std::sqrt(SQR(rad)+SQR(z))-1./rad));
+  den = dentem;
+  return std::max(den,dfloor);
+}
+```
+
+| 代码表达式 | 对应的数学量 |
+| --- | --- |
+| `PoverR(rad, phi, z)` | $c_s^2(R)=c_0^2(R/R_0)^{-q_T}$ |
+| `rho0*pow(rad/r0,dslope)` | $\rho_0(R/R_0)^{-q_D}$，即中面密度 |
+| `sqrt(SQR(rad)+SQR(z))` | $\sqrt{R^2+z^2}=r$，球半径 |
+| `gm0/p_over_r` | $GM/c_s^2(R)$ |
+| `1./sqrt(...)-1./rad` | $1/r-1/R$ |
+| `denmid*exp(...)` | 式 (24) 的完整密度 |
+
+这里 `dslope=-2`、`pslope=-1`，因此代码中的指数已经包含论文负号。`std::max(den,dfloor)` 是额外的数值密度底限；只有解析密度小于底限时才偏离式 (24)。
+
+`NON_BAROTROPIC_EOS` 在本次绝热能量方程编译中成立，所以实际执行的是随 $R$ 变化的 `PoverR()` 分支。`phi` 保留在函数接口中，但这个轴对称平衡解不依赖它。
+
 ## 3.3 旋转平衡与垂直剪切：式 (25)
 
 定义 $\Omega_K(R)=\sqrt{GM/R^3}$。论文的平衡角速度为
@@ -136,6 +173,52 @@ $$
 该式同时包含压强支撑和随高度变化的旋转速度。不能用纯开普勒速度 $\sqrt{GM/R}$ 替代，否则会改变论文需要的垂直剪切背景。论文式 (26) 的薄盘近似也表明 $\partial\Omega/\partial z\ne0$。
 
 `ProblemGenerator()` 先设置平衡密度和三个动量分量，再加入噪声，最后由**包含噪声后的总动能**构造 $E$。平衡状态中 $v_r=v_\theta=0$；它们不是在演化过程中被强制设为零。
+
+### 式 (25) 对应的实际 C++ 代码
+
+```cpp
+Real VelProfileCyl(const Real rad, const Real phi, const Real z) {
+  Real p_over_r = PoverR(rad, phi, z);
+  Real vel = (dslope+pslope)*p_over_r/(gm0/rad)
+             + (1.0+pslope)
+             - pslope*rad/std::sqrt(rad*rad+z*z);
+  vel = std::sqrt(gm0/rad)*std::sqrt(vel) - rad*Omega0;
+  return vel;
+}
+```
+
+第一条给 `vel` 赋值的语句计算的是**无量纲括号**，还不是速度。它与式 (25) 的三项逐项对应：
+
+$$
+\begin{aligned}
+(\mathrm{dslope}+\mathrm{pslope})
+\frac{\mathrm{p\_over\_r}}{\mathrm{gm0}/\mathrm{rad}}
+&=-(q_D+q_T)h^2,\\
+1+\mathrm{pslope}&=1-q_T,\\
+-\mathrm{pslope}\,
+\frac{\mathrm{rad}}{\sqrt{\mathrm{rad}^2+z^2}}
+&=q_T\frac Rr.
+\end{aligned}
+$$
+
+第一行等式使用
+
+$$
+h^2=\frac{c_s^2}{(R\Omega_K)^2}
+=\frac{c_s^2}{GM/R}.
+$$
+
+第二条给 `vel` 赋值的语句再乘 $\sqrt{GM/R}=R\Omega_K$，因此返回的是 $v_\phi=R\Omega$，不是角速度 $\Omega$。尾部的 `-rad*Omega0` 适配旋转参考系；本次该参数为 0，所以不改变论文的惯性系速度。
+
+初始化时，`ProblemGenerator()` 将该速度写入球坐标方位动量：
+
+```cpp
+vel = VelProfileCyl(rad,phi,z);
+// ... spherical-polar branch ...
+phydro->u(IM3,k,j,i) = den*vel;
+```
+
+`IM3` 保存的是 $\rho v_\phi$，不能直接把角速度或线速度不乘密度就写入该位置。四个平衡边界函数也调用同一个 `VelProfileCyl()`，使初态与边界采用相同的旋转平衡。
 
 # 4. Section 3.2：实现式 (27) 的快速冷却
 
@@ -176,6 +259,68 @@ $$
 
 快速冷却抑制会阻碍 VSI 的热浮力响应，但实际出现的波和非线性演化仍由流体方程产生，冷却函数没有植入波纹。
 
+## 4.1 式 (27) 对应的实际 C++ 代码
+
+下面完整列出实际冷却函数，循环与长表达式仅作排版换行。Athena++ 每个完整时间步调用该函数一次，而不是在这里推进一个独立的流体时间步。
+
+```cpp
+void MeshBlock::UserWorkInLoop() {
+  const Real f=-std::expm1(-pmy_mesh->dt/tau);
+  for(int k=ks;k<=ke;++k)
+    for(int j=js;j<=je;++j)
+      for(int i=is;i<=ie;++i) {
+        const Real rho=phydro->u(IDN,k,j,i);
+        const Real kinetic=0.5*(SQR(phydro->u(IM1,k,j,i))+
+          SQR(phydro->u(IM2,k,j,i))+
+          SQR(phydro->u(IM3,k,j,i)))/rho;
+        Real R,phi,z;
+        GetCylCoord(pcoord,R,phi,z,i,j,k);
+        const Real target=rho*PoverR(R,phi,z)/(gamma_gas-1.0);
+        const Real internal=phydro->u(IEN,k,j,i)-kinetic;
+        const Real cooled=internal+f*(target-internal);
+        phydro->u(IEN,k,j,i)=kinetic+cooled;
+        phydro->w(IPR,k,j,i)=(gamma_gas-1.0)*cooled;
+      }
+}
+```
+
+### 数组里保存的物理量
+
+| 数组项或变量 | 含义 |
+| --- | --- |
+| `u(IDN)` | 密度 $\rho$ |
+| `u(IM1), u(IM2), u(IM3)` | 动量密度 $\rho v_r,\rho v_\theta,\rho v_\phi$ |
+| `u(IEN)` | 总能量密度 $E$ |
+| `w(IPR)` | 原始变量中的压强 $P$ |
+| `kinetic` | 动能密度 $K$，不是单位质量动能 |
+| `target` | 目标内能密度 $\epsilon_0$，不是温度或压强 |
+| `internal` / `cooled` | 冷却前 / 后的内能密度 |
+
+### 逐条对应式 (27)
+
+1. `-expm1(-dt/tau)` 等于 $1-\exp(-\Delta t/\tau)$，就是论文的松弛系数。使用 $\operatorname{expm1}(x)=e^x-1$ 可减轻小参数时的相减损失。
+2. 三个 `u(IM*)` 是动量，因此先求平方和，再除以密度并乘 $1/2$，得到 $K=|\mathbf m|^2/(2\rho)$。
+3. `target` 用当前单元密度、径向目标 $c_s^2$ 和 $\gamma-1$ 计算 $\epsilon_0=\rho c_s^2/(\gamma-1)$。
+4. `internal=E-K` 从总能量中分离出当前内能。若直接把总能量松弛到 `target`，就会错误地消掉旋转动能。
+5. `cooled=internal+f*(target-internal)` 对内能应用与论文温度更新相同的指数松弛。
+6. `u(IEN)=kinetic+cooled` 把原动能加回；`w(IPR)=(gamma-1)*cooled` 同步更新压强，使后续时间步估计读取一致的热状态。
+
+为什么更新内能等价于更新温度？在这个冷却子步骤中 $\rho$ 不变、分子量固定，且 $\epsilon\propto\rho T$。因此把论文的温度增量乘上同一个比例系数，就得到代码中的内能增量；密度和三个动量在该函数中均未被重新赋值。
+
+### 与输入文件的连接
+
+```text
+<hydro>
+gamma = 1.4
+<problem>
+p0_over_r0 = 0.0025
+pslope = -1.0
+dslope = -2.0
+tau = 6.283185307179586e-10
+```
+
+`InitUserMeshData()` 读取这些参数，`PoverR()` 将前两项组合成 $c_s^2(R)$，而每一步冷却都会重新在当前单元位置计算目标内能。参数 `tau` 已经换成代码时间，不能直接误填为没有乘 $2\pi$ 的 `1e-10`。
+
 # 5. Section 3.3：区域、网格、扰动与边界
 
 ## 5.1 完整计算域与 Figure 2 裁剪区
@@ -209,6 +354,147 @@ $$
 径向和极角的内、外边界使用四个 `Disk*X1/X2()` 函数，在幽灵单元恢复平衡 $\rho$、$P$ 和 $v_\phi$，并令平衡的径向、极角速度为零。边界不持续注入初始随机噪声，也不额外增加论文未指定的阻尼层。方位角边界为周期条件，因 `nx3=1` 不解析方位角模式。
 
 默认将区域分为四个 $176\times448$ 网格块，使用四个 OpenMP 线程；这是计算组织方式，不是额外的物理参数。初始密度底限 `dfloor=1e-12`、压强底限 `pfloor=1e-16` 属于数值保护设置，不是论文明确列出的物理参数。
+
+\newpage
+
+## 5.4 Section 3.3 原文逐项对应代码
+
+这段 setup 并不全部位于一个 C++ 函数里。**范围、单元数、边界类型和终止时间由输入文件给出；初始噪声和平衡边界由问题生成器执行；实际网格和时间推进由 Athena++ 内核完成。**
+
+| 原文要求 | 对应文件与位置 |
+| --- | --- |
+| $r\in[1,30]$，宽度比 1.005 | 输入 `<mesh>` 的 `x1min/x1max/x1rat` |
+| $\theta\in[\pi/2-5h,\pi/2+5h]$ | 输入 `<mesh>` 的 `x2min/x2max` |
+| $704\times448$，二维 | 输入 `nx1/nx2/nx3`；球坐标编译选项 |
+| $GM=R_0=1$ | 输入 `<problem>` 的 `GM/r0`；初始化函数读取 |
+| $3000P_0$ 与 $P_0=2\pi/\Omega_0$ | 输入 `<time>` 的 `tlim`；见下文时间区别 |
+| 1% 局部声速噪声 | `ProblemGenerator()` 中三条动量增量语句 |
+| 边界严格恢复平衡 | `<mesh>` 的 `user` 标志及四个边界函数 |
+
+### A. 径向范围、极角范围与单元数
+
+以下为 `inputs/athinput.figure2` 的真实 `<mesh>` 设置，省略不相关行：
+
+```text
+<mesh>
+nx1 = 704
+x1min = 1.0
+x1max = 30.0
+x1rat = 1.005
+ix1_bc = user
+ox1_bc = user
+nx2 = 448
+x2min = 1.3207963267948966
+x2max = 1.8207963267948966
+ix2_bc = user
+ox2_bc = user
+nx3 = 1
+```
+
+在 `spherical_polar` 坐标下，`x1` 就是球半径 $r$，`x2` 就是极角 $\theta$。将 $h=0.05$ 代入论文范围：
+
+$$
+\frac\pi2-5h=1.3207963267948966,\qquad
+\frac\pi2+5h=1.8207963267948966.
+$$
+
+因此没有把极角范围作为另一自由参数。输入没有显式指定 `x2rat`，Athena++ 默认取 1，即均匀极角网格。`nx3=1` 与球坐标编译选项一起给出轴对称二维计算。
+
+`x1rat=1.005` 交给 Athena++ 内核生成真实单元面位置。对应上游 `src/mesh/mesh.hpp` 中的 `DefaultMeshGeneratorX1()`，而不是本仓库 `ProblemGenerator()` 中的随机噪声函数。对本次参数，其单元面可写为
+
+$$
+r_i=1+29\frac{q^i-1}{q^{704}-1},\qquad
+q=1.005,\quad i=0,\ldots,704.
+$$
+
+这个表达式既保持两个端点，也使 $\Delta r_{i+1}/\Delta r_i=q$。单元数和范围确定后，前文提到的每尺度高分辨率估算不一致就需要单独报告，不能再另设一个“12 cells/H”开关来同时满足相互矛盾的数字。
+
+### B. 单位与终止时间
+
+输入文件中：
+
+```text
+<problem>
+GM = 1.0
+r0 = 1.0
+rho0 = 1.0
+```
+
+`InitUserMeshData()` 对应读取：
+
+```cpp
+gm0 = pin->GetOrAddReal("problem","GM",0.0);
+r0 = pin->GetOrAddReal("problem","r0",1.0);
+rho0 = pin->GetReal("problem","rho0");
+```
+
+`gm0`、`r0` 随后用于密度和旋转解析解；同一个输入 `GM` 也由 Athena++ 内置引力模块读取。
+
+**论文 setup 的总时长与当前输入并非同一个目标。** 论文说运行到 $3000P_0$，其代码时间为
+
+$$
+t_{3000}=3000\times2\pi=18849.55592153876.
+$$
+
+用户本次首先要求 Figure 2，该图时间为 $500P_0$，所以实际输入为：
+
+```text
+<time>
+nlim = -1
+tlim = 3141.592653589793
+```
+
+`nlim=-1` 表示不设置步数上限，`tlim=500\times2\pi` 控制目标终止时间。不能声称当前输入已经实现论文整段 $3000P_0$ 的分析时长。如果后续要改为该完整时长，输入与运行脚本/续算命令中的时间覆盖项都需要一致修改；仅改变 PDF 中的数字不会改变模拟。本次文档更新没有修改正在运行的目标。
+
+### C. 1% 声速噪声如何加入守恒量
+
+输入设置：
+
+```text
+noise_amp = 0.01
+seed = 202211
+```
+
+`InitUserMeshData()` 读取幅度和种子，`ProblemGenerator()` 在平衡动量上加入：
+
+```cpp
+Real cs=std::sqrt(PoverR(rad,phi,z));
+phydro->u(IM1,k,j,i)+=den*noise_amp*cs*Noise(x1,x2,0);
+phydro->u(IM2,k,j,i)+=den*noise_amp*cs*Noise(x1,x2,1);
+phydro->u(IM3,k,j,i)+=den*noise_amp*cs*Noise(x1,x2,2);
+```
+
+这里 `cs` 随柱半径变化，因此确实是局部声速的 1%。守恒数组保存 $\rho\mathbf v$，故增量为 $\rho\delta\mathbf v$，代码中的 `den*` 不能省掉。`Noise()` 返回 $[-1,1)$ 内的确定性伪随机值；最后一个参数区分三个速度分量。
+
+这些语句只在初始化时执行，不是在每一步持续驱动。噪声加入后，初始总能量也按含噪声的三个动量重新计算，避免动量和能量不一致。
+
+### D. “边界严格为平衡解”如何执行
+
+第一层是输入文件中的四个 `user` 边界标志。第二层是在 `InitUserMeshData()` 注册实际函数，例如：
+
+```cpp
+if (mesh_bcs[BoundaryFace::inner_x2] == GetBoundaryFlag("user")) {
+  EnrollUserBoundaryFunction(BoundaryFace::inner_x2, DiskInnerX2);
+}
+```
+
+其他三个方向分别注册 `DiskInnerX1`、`DiskOuterX1` 和 `DiskOuterX2`。第三层是函数真正给幽灵单元赋值。以 `DiskInnerX2()` 的球坐标分支为例，下面是实际循环体中的核心语句：
+
+```cpp
+GetCylCoord(pco,rad,phi,z,i,jl-j,k);
+prim(IDN,k,jl-j,i) = DenProfileCyl(rad,phi,z);
+vel = VelProfileCyl(rad,phi,z);
+// Optional orbital-advection adjustment is inactive in this run.
+prim(IM1,k,jl-j,i) = 0.0;
+prim(IM2,k,jl-j,i) = 0.0;
+prim(IM3,k,jl-j,i) = vel;
+if (NON_BAROTROPIC_EOS)
+  prim(IEN,k,jl-j,i) = PoverR(rad,phi,z)*prim(IDN,k,jl-j,i);
+```
+
+`jl-j` 定位极角内边界的幽灵层。赋值依次恢复式 (24) 的密度、零子午面速度、式 (25) 的旋转线速度和 $P=\rho c_s^2$。这一段操作的是**原始变量数组 `prim`**，所以速度不乘密度。上游枚举 `IEN=IPR=4`；该数组里 `prim(IEN)` 使用的是压强槽位，不是把总能量赋成了压强。
+
+四个边界均使用相同的平衡函数，所以与初态一致；不往边界重新加入初始化噪声。只恢复幽灵单元，不把相邻活动单元全部锁死为平衡状态。活动区域内的波由流体通量演化，这也是边界条件与人为强制整个盘保持静态的区别。
 
 # 6. 从输出到 Figure 2 与 Movie
 
