@@ -91,6 +91,6 @@ python3 scripts/make_movie.py
 
 `python3 scripts/watch_movie.py` 可持续监测新数据并自动更新视频，直到最后一个 500P0 快照合成成功。当前监测进程已经在云环境中启动，进程不会保证随环境休眠保留。
 
-仓库中的 [`media/figure2_evolution.mp4`](media/figure2_evolution.mp4) 是已上传的 **0–23 P0** 视频（24 个时刻，每帧 0.25 秒）；对应真实时间记录见 `media/movie_metadata.json`。云端 `results/movie_figure2/figure2_evolution.mp4` 会随新数据继续更新；GitHub 中的版本需要再次提交才会更新。500P0 的计算尚未完成。
+仓库中的 [`media/figure2_evolution.mp4`](media/figure2_evolution.mp4) 是已上传的 **0–25 P0** 视频（26 个时刻，每帧 0.25 秒）；对应真实时间记录见 `media/movie_metadata.json`。云端 `results/movie_figure2/figure2_evolution.mp4` 会随新数据继续更新；GitHub 中的版本需要再次提交才会更新。500P0 的计算尚未完成。
 
 图像和视频的标题、刻度及公式统一使用 Times 风格；当前云环境采用 Times 兼容的 Nimbus Roman。若系统安装了 Times New Roman，字体配置会优先使用它。

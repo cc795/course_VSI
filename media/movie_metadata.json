@@ -169,7 +169,21 @@
       "directory": "/workspace/course_VSI/results/figure2",
       "snapshot_number": 12,
       "vz_cs_rms_R1_2": 0.004798196648849419
+    },
+    {
+      "orbit": 24,
+      "time_P0": 24.000660911223672,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 13,
+      "vz_cs_rms_R1_2": 0.004478330473216342
+    },
+    {
+      "orbit": 25,
+      "time_P0": 25.00024944680663,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 14,
+      "vz_cs_rms_R1_2": 0.004649136515707829
     }
   ],
-  "last_orbit": 23
+  "last_orbit": 25
 }
