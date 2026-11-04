@@ -2,8 +2,6 @@
 
 An Athena++ implementation of the axisymmetric, two-dimensional hydrodynamic disc described in Section 3 of *Wavelike nature of the vertical shear instability in global protoplanetary discs*, MNRAS 514, 4581–4587. DOI: [10.1093/mnras/stac1598](https://doi.org/10.1093/mnras/stac1598).
 
-The target is the Figure 2 snapshot at **t = 500 P0**. The paper's later wave analysis extends to 3000 P0.
-
 ## Athena++ dependency
 
 Use this problem generator with the official [Athena++ code](https://github.com/PrincetonUniversity/athena). Copy [`src/svanberg.cpp`](src/svanberg.cpp) into Athena++'s `src/pgen/` directory, configure Athena++ with `--prob=svanberg --coord=spherical_polar --eos=adiabatic --flux=hllc -omp`, and compile it. Run the resulting executable with [`inputs/athinput.figure2`](inputs/athinput.figure2):
