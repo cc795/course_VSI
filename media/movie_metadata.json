@@ -1,5 +1,6 @@
 {
-  "seconds_per_snapshot": 1,
+  "seconds_per_snapshot": 0.25,
+  "style": "neon_single_panel_v2",
   "frames": [
     {
       "orbit": 0,
@@ -112,7 +113,35 @@
       "directory": "/workspace/course_VSI/results/figure2",
       "snapshot_number": 4,
       "vz_cs_rms_R1_2": 0.004939964167204823
+    },
+    {
+      "orbit": 16,
+      "time_P0": 16.0006422037437,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 5,
+      "vz_cs_rms_R1_2": 0.005459800005591227
+    },
+    {
+      "orbit": 17,
+      "time_P0": 17.000405809764057,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 6,
+      "vz_cs_rms_R1_2": 0.005077788975232449
+    },
+    {
+      "orbit": 18,
+      "time_P0": 18.000503641164908,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 7,
+      "vz_cs_rms_R1_2": 0.004593192142123343
+    },
+    {
+      "orbit": 19,
+      "time_P0": 19.000378655645434,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 8,
+      "vz_cs_rms_R1_2": 0.004773253743115773
     }
   ],
-  "last_orbit": 15
+  "last_orbit": 19
 }

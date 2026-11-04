@@ -4,6 +4,7 @@ from pathlib import Path
 import argparse, json, re, subprocess, os, fcntl
 import numpy as np
 from plot_figure2 import load, plt, SymLogNorm
+from matplotlib.colors import LinearSegmentedColormap
 root=Path(__file__).resolve().parents[1]
 
 def discover():
@@ -35,23 +36,29 @@ def render(directory,number,time,n,png):
     r=.75*np.diff(rf**4)/np.diff(rf**3)
     t=np.diff(np.sin(tf)-tf*np.cos(tf))/(-np.diff(np.cos(tf)))
     rr,tt=np.meshgrid(r,t);R=rr*np.sin(tt);z=rr*np.cos(tt);cs=np.sqrt(.0025/R)
-    v=d['vel'];u=(v[...,0]*np.sin(tt)+v[...,1]*np.cos(tt))/cs
+    v=d['vel']
     w=(v[...,0]*np.cos(tt)-v[...,1]*np.sin(tt))/cs
-    mask=(R>=1.7)&(R<=2)&(np.indices(R.shape)[0]%10==0)&(np.indices(R.shape)[1]%2==0)
-    fig=plt.figure(figsize=(12,8),dpi=120)
-    gs=fig.add_gridspec(2,2,width_ratios=[3,1],height_ratios=[.055,1],left=.08,right=.96,bottom=.10,top=.82,hspace=.18,wspace=.08)
-    ax=fig.add_subplot(gs[1,0]);bx=fig.add_subplot(gs[1,1],sharey=ax);cax=fig.add_subplot(gs[0,0])
+    background='#080d1c'
+    cmap=LinearSegmentedColormap.from_list('neon_diverging',
+       ['#00f0ff','#007acc','#193b74',background,'#58235f','#d5299b','#ff5a9e'])
+    fig=plt.figure(figsize=(12,8),dpi=120,facecolor=background)
+    gs=fig.add_gridspec(2,1,height_ratios=[.045,1],left=.10,right=.95,bottom=.11,top=.82,hspace=.22)
+    ax=fig.add_subplot(gs[1,0],facecolor=background)
+    cax=fig.add_subplot(gs[0,0],facecolor=background)
     im=ax.pcolormesh(rf[None,:]*np.sin(tf[:,None]),rf[None,:]*np.cos(tf[:,None]),w,
-       cmap='RdBu_r',norm=SymLogNorm(linthresh=1e-4,vmin=-.3,vmax=.3),rasterized=True)
+       cmap=cmap,norm=SymLogNorm(linthresh=1e-4,vmin=-.3,vmax=.3),rasterized=True)
     ax.set(xlim=(1,2),ylim=(-.6,.6),xlabel=r'$R/R_0$',ylabel=r'$z/R_0$')
-    bx.quiver(R[mask],z[mask],u[mask],w[mask],angles='xy',scale_units='xy',scale=3,width=.006,minlength=.4)
-    bx.set(xlim=(1.7,2),xlabel=r'$R/R_0$');bx.tick_params(labelleft=False)
-    cb=fig.colorbar(im,cax=cax,orientation='horizontal',ticks=[-.1,-.001,0,.001,.1]);cb.set_label(r'$v_z/c_s$')
+    cb=fig.colorbar(im,cax=cax,orientation='horizontal',ticks=[-.1,-.001,0,.001,.1])
+    cb.set_label(r'$v_z/c_s$',color='#e9f2ff',fontsize=15)
     cax.xaxis.set_ticks_position('top');cax.xaxis.set_label_position('top')
-    fig.suptitle(rf'Athena++ VSI simulation: $t\simeq{n}P_0$',y=.965,fontsize=20)
-    fig.text(.5,.90,'Svanberg et al. (2022), Section 3 | 704 x 448',ha='center',fontsize=11)
-    fig.text(.5,.025,f'Actual t = {time/(2*np.pi):.6f} P0 | Fixed colour/arrow scales | No temporal interpolation',ha='center',fontsize=10)
-    fig.savefig(png);plt.close(fig)
+    for panel in (ax,cax):
+        panel.tick_params(colors='#c6d7ed',labelsize=12)
+        panel.xaxis.label.set_color('#e9f2ff');panel.yaxis.label.set_color('#e9f2ff')
+        panel.xaxis.label.set_size(16);panel.yaxis.label.set_size(16)
+        for spine in panel.spines.values(): spine.set_color('#42516b')
+    cb.outline.set_edgecolor('#42516b')
+    fig.suptitle(rf'$t={n}P_0$',y=.955,fontsize=28,color='#e9f2ff')
+    fig.savefig(png,facecolor=background);plt.close(fig)
     return {'orbit':n,'time_P0':time/(2*np.pi),'directory':str(directory),'snapshot_number':number,
             'vz_cs_rms_R1_2':float(np.sqrt(np.mean(w[(R>=1)&(R<=2)]**2)))}
 
@@ -63,20 +70,20 @@ def main():
     data=discover()
     if not data or len(data)-1<a.min_last: raise ValueError(f'Only {len(data)} contiguous snapshots available')
     out=root/'results/movie_figure2';out.mkdir(exist_ok=True)
-    frames=out/'frames';frames.mkdir(exist_ok=True)
-    clips=out/'clips';clips.mkdir(exist_ok=True)
+    frames=out/'frames_neon_v2';frames.mkdir(exist_ok=True)
+    clips=out/'clips_neon_v2_fast';clips.mkdir(exist_ok=True)
     metadata=[]
     for n,(directory,number,time) in enumerate(data):
         png=frames/f'frame_{n:04d}.png';clip=clips/f'clip_{n:04d}.mp4';meta=frames/f'frame_{n:04d}.json'
         if not clip.exists():
             info=render(directory,number,time,n,png)
-            subprocess.run(['ffmpeg','-v','error','-y','-loop','1','-framerate','30','-i',str(png),'-t','1','-c:v','libx264','-threads','1','-crf','18','-preset','fast','-pix_fmt','yuv420p',str(clip)],check=True)
+            subprocess.run(['ffmpeg','-v','error','-y','-loop','1','-framerate','24','-i',str(png),'-frames:v','6','-c:v','libx264','-threads','1','-crf','18','-preset','fast','-pix_fmt','yuv420p',str(clip)],check=True)
             meta.write_text(json.dumps(info,indent=2)+'\n')
         metadata.append(json.loads(meta.read_text()))
     concat=out/'clips.txt';concat.write_text(''.join(f"file '{clips/f'clip_{n:04d}.mp4'}'\n" for n in range(len(data))))
     tmp=out/'figure2_evolution.tmp.mp4';target=out/'figure2_evolution.mp4'
     subprocess.run(['ffmpeg','-v','error','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy','-movflags','+faststart',str(tmp)],check=True)
     os.replace(tmp,target)
-    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':1,'frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
-    print(f'{target}: orbits 0..{len(data)-1}, duration {len(data)} seconds',flush=True)
+    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':0.25,'style':'neon_single_panel_v2','frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
+    print(f'{target}: orbits 0..{len(data)-1}, duration {len(data)*.25:g} seconds',flush=True)
 if __name__=='__main__': main()
