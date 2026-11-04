@@ -72,7 +72,3 @@ Titles, tick labels, and mathematical expressions use Times-style typography, pr
 - [Inspect frame times and data provenance](media/movie_metadata.json)
 
 The frame metadata describes the time range included in the uploaded movie. Generated simulation data and build products are excluded from version control.
-
-## Validation
-
-The validation script checks the equilibrium density profile, initial perturbation amplitude, temperature relaxation, finite and positive fluid variables, and agreement between continuous and restarted integrations. VTK output is single precision, while the solver uses double precision; comparisons account for output rounding.
