@@ -1,98 +1,77 @@
 # Svanberg, Cui & Latter (2022), Figure 2: Athena++ simulation
 
-Reference: *Wavelike nature of the vertical shear instability in global protoplanetary discs*, MNRAS 514, 4581–4587. DOI: [10.1093/mnras/stac1598](https://doi.org/10.1093/mnras/stac1598).
+An Athena++ implementation of the axisymmetric, two-dimensional hydrodynamic disc described in Section 3 of *Wavelike nature of the vertical shear instability in global protoplanetary discs*, MNRAS 514, 4581–4587. DOI: [10.1093/mnras/stac1598](https://doi.org/10.1093/mnras/stac1598).
 
-This project implements the axisymmetric, two-dimensional hydrodynamic disc described in Section 3, targeting the Figure 2 snapshot at **t = 500 P0**. The production run writes to `results/figure2/`. The `COMPLETE` marker is created only after both the target simulation and plotting finish successfully. The paper's subsequent wave analysis extends to 3000 P0; Figure 2 requires 500 P0.
+The target is the Figure 2 snapshot at **t = 500 P0**. The paper's later wave analysis extends to 3000 P0.
 
 ## Physical and numerical setup
 
 - Spherical polar coordinates `(r, theta, phi)`, axisymmetry (`nx3=1`), no magnetic field, and no explicit viscosity.
 - `GM = R0 = rho0 = 1`, `P0 = 2π`, `gamma = 7/5`, and `h = 0.05`.
 - `cs² = 0.0025/R` and `rho_mid = R^-2`. The vertically stratified equilibrium density and rotation follow equations (24) and (25). Gravity uses Athena++'s built-in point-mass source term.
-- `r ∈ [1,30]` and `theta ∈ [π/2−0.25, π/2+0.25]`, with a `704×448` grid. Adjacent radial cell widths have ratio `x1rat=1.005`.
+- `r ∈ [1,30]` and `theta ∈ [π/2−0.25, π/2+0.25]`, with a `704×448` grid and adjacent radial cell-width ratio `x1rat=1.005`.
 - Ghost cells at all four active boundaries are reset to the equilibrium solution. No additional damping zones are applied.
 - Each velocity component receives independent uniform perturbations in `[-0.01 cs, 0.01 cs]`, with seed `202211`. Coordinate-based hashing makes the perturbations independent of the block decomposition.
-- After each complete timestep, internal energy is relaxed using the exact exponential cooling update in equation (27), with `tau = 10^-10 P0`. Kinetic energy is preserved, and both conserved energy and primitive pressure are updated. No explicit `dt/tau` stability restriction is imposed.
-- The solver uses the adiabatic energy equation, VL2 integration, second-order PLM reconstruction, HLLC fluxes, `CFL=0.3`, double precision, and four OpenMP threads. The paper does not specify every numerical option or the random seed; these are documented implementation choices, and pixel-for-pixel agreement is not guaranteed.
-- The paper's resolution estimates are internally inconsistent: 448 cells across a `10H` angular domain imply approximately 44.8 cells/H, rather than the stated approximately 12 cells/H. This implementation follows the explicitly stated grid dimensions and domain. Also, a strictly logarithmic grid over `[1,30]` with 704 cells would have width ratio `30^(1/704) ≈ 1.004843`. Here, the stated ratio `1.005` is used; Athena++ preserves the endpoints and geometrically increases the cell widths.
+- After each complete timestep, internal energy is relaxed using the exact exponential update in equation (27), with `tau = 10^-10 P0`. Kinetic energy is preserved, and both conserved energy and primitive pressure are updated.
+- The solver uses the adiabatic energy equation, VL2 integration, second-order PLM reconstruction, HLLC fluxes, `CFL=0.3`, and double precision. The supplied input uses four OpenMP threads.
+
+The paper does not specify every numerical option or the random seed. These are documented implementation choices, and pixel-for-pixel agreement is not guaranteed.
+
+The paper's resolution estimates are internally inconsistent: 448 cells across a `10H` angular domain imply approximately 44.8 cells/H, rather than the stated approximately 12 cells/H. This implementation follows the explicit grid dimensions and domain. A strictly logarithmic grid over `[1,30]` with 704 cells would have width ratio `30^(1/704) ≈ 1.004843`; here, the stated ratio `1.005` is used, with Athena++ preserving the endpoints and geometrically increasing cell widths.
+
+## Repository contents
+
+| File | Purpose |
+| --- | --- |
+| [`src/svanberg.cpp`](src/svanberg.cpp) | Equilibrium disc, velocity perturbations, boundary conditions, and thermal relaxation. |
+| [`inputs/athinput.figure2`](inputs/athinput.figure2) | Physical parameters, mesh, integration settings, and output intervals. |
+| [`scripts/build.sh`](scripts/build.sh) | Build the problem generator with the pinned Athena++ revision. |
+| [`scripts/run_figure2.sh`](scripts/run_figure2.sh) | Run or resume the simulation and generate the target static plot. |
+| [`scripts/plot_figure2.py`](scripts/plot_figure2.py) | Generate the paper-style two-panel plot. |
+| [`scripts/make_movie.py`](scripts/make_movie.py) | Assemble consecutive snapshots into an MP4. |
+| [`scripts/watch_movie.py`](scripts/watch_movie.py) | Monitor new snapshots and refresh the movie. |
+| [`scripts/run_movie_data.sh`](scripts/run_movie_data.sh) | Generate supplemental early-time snapshots. |
+| [`scripts/validate.py`](scripts/validate.py) | Check equilibrium initialization, cooling, and restart consistency. |
+| [`scripts/plot_style.py`](scripts/plot_style.py) | Configure Times-style typography. |
 
 ## Build and run
 
-Requirements: g++, make, Python 3, NumPy, and Matplotlib. The upstream Athena++ revision is pinned to `053bc738d5c85dac717326b4338b34c7db4e715d`. The build script copies the standalone problem generator into the upstream checkout without changing `disk.cpp` or the solver.
+Requirements: g++, make, Python 3, NumPy, Matplotlib, and a Times-family font. Movie encoding additionally requires FFmpeg.
+
+The upstream Athena++ revision is pinned to `053bc738d5c85dac717326b4338b34c7db4e715d`. The build script copies the standalone problem generator into the Athena++ checkout without changing `disk.cpp` or the solver.
 
 ```bash
-cd /workspace/course_VSI
-bash scripts/build.sh
+git clone https://github.com/cc795/course_VSI.git
+cd course_VSI
+ATHENA_DIR="$PWD/../athena" bash scripts/build.sh
 bash scripts/run_figure2.sh
 ```
 
-For a background run (already running in the current cloud session; do not launch a duplicate):
+Set `ATHENA_DIR` to the desired Athena++ checkout location. The build script creates the checkout if it does not exist and verifies the pinned revision.
 
-```bash
-nohup bash scripts/run_figure2.sh > results/figure2/run.log 2>&1 < /dev/null &
+The runner prevents duplicate runs in the same output directory and supports resuming from a restart file. The input targets 500 P0, with full VTK snapshots every 1 P0, restart files every 10 P0, and history records every 0.1 P0. Reported simulation time is in code units; divide by `2π` to express it in P0.
+
+## Plotting and movies
+
+The static Figure 2 plot shows a signed logarithmic map of `vz/cs` and a meridional velocity-vector panel. The coordinate transformation uses spherical volume-averaged cell centers:
+
+```text
+vz = vr cos(theta) − vtheta sin(theta)
+vR = vr sin(theta) + vtheta cos(theta)
 ```
 
-The runner uses a lock to prevent duplicate runs in the same output directory. After an interruption, rerun the same command to resume from the final restart file, or the latest numbered restart if no final restart exists. Live processes are not guaranteed to survive cloud-environment suspension or restart. Use the existing checkout; do not create a Git worktree unless explicitly requested.
+The movie uses a single flow panel with a dark background and a cyan–true-red signed logarithmic colormap. Color limits and coordinate ranges remain fixed across frames. Titles display the nominal integer orbit; actual snapshot times are retained in the metadata. Regular snapshots are written on the first timestep that reaches or crosses each scheduled time.
 
-The input file, `inputs/athinput.figure2`, targets 500 P0. Full VTK snapshots are written every 1 P0, restart files every 10 P0, and history records every 0.1 P0. The production run switched to the one-orbit snapshot interval at a checkpoint near 10 P0; earlier missing snapshots were subsequently generated by a separate run for the movie.
+Each snapshot is displayed for **0.25 seconds**. Encoding is H.264 at `1440×960` and 24 fps. Frames follow the contiguous sequence `0,1,2,…`, stopping at the first missing orbit. The movie uses simulation data without temporal interpolation. Rendered frames and clips are cached for incremental updates.
 
-At the target time, the runner automatically generates:
+Titles, tick labels, and mathematical expressions use Times-style typography, preferring Times New Roman and falling back to the Times-compatible Nimbus Roman font.
 
-- `results/figure2/figure2.png`: the paper-style two-panel plot, with a signed logarithmic map of `vz/cs` on the left and `(vR,vz)/cs` arrows on the right.
-- `results/figure2/diagnostics.json`: output time, grid dimensions, temperature relaxation error, and inner-disc RMS `vz/cs`.
-- `results/figure2/COMPLETE`: confirmation that the target calculation and plotting succeeded.
+- [Download the uploaded MP4](media/figure2_evolution.mp4)
+- [View the style preview](media/figure2_preview.png)
+- [Inspect frame times and data provenance](media/movie_metadata.json)
 
-Check progress with:
+The frame metadata describes the time range included in the uploaded movie. Generated simulation data and build products are excluded from version control.
 
-```bash
-tail -n 5 results/figure2/run.log
-```
+## Validation
 
-The log reports time in code units; divide by `2π` to obtain time in P0. The current environment has approximately four CPU cores of quota. A 200-step benchmark took 8.52 seconds, giving a linear estimate of approximately 6.7 hours to reach 500 P0. Evolving flow speeds and competing workloads can change the actual runtime.
-
-To regenerate the static plot after the target snapshot exists:
-
-```bash
-python3 scripts/plot_figure2.py results/figure2 --require-target --output results/figure2/figure2.png
-```
-
-Coordinates use the spherical volume-averaged cell centers, with `vz = vr cos(theta) − vtheta sin(theta)` and `vR = vr sin(theta) + vtheta cos(theta)`. All radial blocks are read and checked. VTK stores single-precision output; the solver itself remains double precision.
-
-## Validation performed
-
-The full `704×448` grid completed a 200-step benchmark without nonfinite values, negative densities, or negative pressures. The initial equilibrium density error was approximately `6×10^-8`, consistent with output rounding, and the relative temperature error after cooling was approximately `1.2×10^-7`. A continuous 20-step run was also compared with a 10-step run followed by a 10-step restart. Outputs agreed within single-precision tolerance, with a maximum density difference of approximately `1.5×10^-8`.
-
-```bash
-python3 scripts/validate.py
-```
-
-The validation report is stored in `results/validation.json`. The image `results/benchmark/early_snapshot.png` is only a plotting check at approximately `0.16 P0`, not the Figure 2 result. Wave structure and amplitudes at 500 P0 must be assessed after the production run finishes.
-
-Commands to reproduce the short validation runs:
-
-```bash
-bin/athena -i inputs/athinput.figure2 -d results/benchmark time/nlim=200 output1/dt=0.5 output2/dt=0.5
-bin/athena -i inputs/athinput.figure2 -d results/restart_split time/nlim=10 output1/dt=0.01 output2/dt=0.01
-bin/athena -r results/restart_split/vsi.final.rst -d results/restart_split time/nlim=20
-bin/athena -i inputs/athinput.figure2 -d results/restart_direct time/nlim=20 output1/dt=0.01 output2/dt=0.01
-```
-
-Create the corresponding output directories first, preserve existing results, and avoid simultaneous writes to the same directory.
-
-## Evolution movie
-
-`scripts/run_movie_data.sh` independently reproduces the missing 0–11 P0 snapshots using the same resolution, equilibrium disc, and deterministic perturbations, without modifying the production data. Regular snapshots are written on the first timestep that reaches or crosses an integer orbit, so the timing offset is less than one timestep. Frame titles show the nominal integer orbit; actual times are retained in the metadata.
-
-```bash
-python3 scripts/make_movie.py
-```
-
-This command combines snapshots from `results/movie_early/` and `results/figure2/`, selecting the contiguous sequence `0,1,2,…`. It stops at the first missing orbit rather than skipping times. The supplemental and production runs share the same initial conditions and numerical method, but the production run was restarted near 10 P0, so their floating-point trajectories are not identical step by step. The movie uses actual simulation snapshots without temporal interpolation or warping of the paper's figure.
-
-The output is `results/movie_figure2/figure2_evolution.mp4`. Each snapshot remains on screen for 0.25 seconds. Encoding is H.264 at `1440×960` and 24 fps. The design uses a dark background and a cyan–true-red signed logarithmic colormap, with fixed color limits and coordinate ranges across all frames. Only the main flow panel is shown. `movie_metadata.json` records each frame's actual simulation time and data source. PNG frames and individual MP4 clips are cached, so subsequent runs render only new snapshots before updating the movie.
-
-`python3 scripts/watch_movie.py` monitors new snapshots and updates the cloud movie until the 500 P0 frame has been included successfully. The watcher has been started in the current cloud session; its process is not guaranteed to survive environment suspension.
-
-The version uploaded to this repository, [`media/figure2_evolution.mp4`](media/figure2_evolution.mp4), currently covers **0–25 P0**: 26 snapshots at 0.25 seconds each. Exact times are recorded in `media/movie_metadata.json`. The cloud copy in `results/movie_figure2/` continues to update automatically; updating the GitHub copy requires another commit and push. The 500 P0 calculation is not yet complete.
-
-Titles, tick labels, and mathematical expressions use Times-style typography. The current cloud environment uses the Times-compatible Nimbus Roman font. If Times New Roman is installed, the font configuration prefers it.
+The validation script checks the equilibrium density profile, initial perturbation amplitude, temperature relaxation, finite and positive fluid variables, and agreement between continuous and restarted integrations. VTK output is single precision, while the solver uses double precision; comparisons account for output rounding.
