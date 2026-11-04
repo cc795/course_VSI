@@ -330,7 +330,308 @@
       "directory": "/workspace/course_VSI/results/figure2",
       "snapshot_number": 35,
       "vz_cs_rms_R1_2": 0.017164162534127524
+    },
+    {
+      "orbit": 47,
+      "time_P0": 47.00061920226275,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 36,
+      "vz_cs_rms_R1_2": 0.017748848500022205
+    },
+    {
+      "orbit": 48,
+      "time_P0": 48.000048582902615,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 37,
+      "vz_cs_rms_R1_2": 0.018499027050670434
+    },
+    {
+      "orbit": 49,
+      "time_P0": 49.00036923122379,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 38,
+      "vz_cs_rms_R1_2": 0.02057042422509013
+    },
+    {
+      "orbit": 50,
+      "time_P0": 50.000689879544964,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 39,
+      "vz_cs_rms_R1_2": 0.020474563860044665
+    },
+    {
+      "orbit": 51,
+      "time_P0": 51.00007151370191,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 40,
+      "vz_cs_rms_R1_2": 0.02278141929181073
+    },
+    {
+      "orbit": 52,
+      "time_P0": 52.00039216202309,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 41,
+      "vz_cs_rms_R1_2": 0.02252056067467048
+    },
+    {
+      "orbit": 53,
+      "time_P0": 53.00069689484996,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 42,
+      "vz_cs_rms_R1_2": 0.022781422307953898
+    },
+    {
+      "orbit": 54,
+      "time_P0": 54.000126275489826,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 43,
+      "vz_cs_rms_R1_2": 0.021281502926377798
+    },
+    {
+      "orbit": 55,
+      "time_P0": 55.00046283930532,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 44,
+      "vz_cs_rms_R1_2": 0.02547573949325806
+    },
+    {
+      "orbit": 56,
+      "time_P0": 56.00078348762649,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 45,
+      "vz_cs_rms_R1_2": 0.02360976435729842
+    },
+    {
+      "orbit": 57,
+      "time_P0": 57.00022878376067,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 46,
+      "vz_cs_rms_R1_2": 0.025039819248229737
+    },
+    {
+      "orbit": 58,
+      "time_P0": 58.00053351658754,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 47,
+      "vz_cs_rms_R1_2": 0.02332183531220855
+    },
+    {
+      "orbit": 59,
+      "time_P0": 59.00087008040303,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 48,
+      "vz_cs_rms_R1_2": 0.025921880719089123
+    },
+    {
+      "orbit": 60,
+      "time_P0": 60.0002994610429,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 49,
+      "vz_cs_rms_R1_2": 0.024412393138846206
+    },
+    {
+      "orbit": 61,
+      "time_P0": 61.000620109364085,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 50,
+      "vz_cs_rms_R1_2": 0.027155464120463296
+    },
+    {
+      "orbit": 62,
+      "time_P0": 62.000049490003946,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 51,
+      "vz_cs_rms_R1_2": 0.025725087455327873
+    },
+    {
+      "orbit": 63,
+      "time_P0": 63.00038605381943,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 52,
+      "vz_cs_rms_R1_2": 0.026139118496876595
+    },
+    {
+      "orbit": 64,
+      "time_P0": 64.0006907866463,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 53,
+      "vz_cs_rms_R1_2": 0.023753473051750545
+    },
+    {
+      "orbit": 65,
+      "time_P0": 65.00013608278049,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 54,
+      "vz_cs_rms_R1_2": 0.026742996306575596
+    },
+    {
+      "orbit": 66,
+      "time_P0": 66.00045673110166,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 55,
+      "vz_cs_rms_R1_2": 0.026190992343984153
+    },
+    {
+      "orbit": 67,
+      "time_P0": 67.00076146392854,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 56,
+      "vz_cs_rms_R1_2": 0.02590439867589964
+    },
+    {
+      "orbit": 68,
+      "time_P0": 68.00020676006271,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 57,
+      "vz_cs_rms_R1_2": 0.024921770177347476
+    },
+    {
+      "orbit": 69,
+      "time_P0": 69.00051149288959,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 58,
+      "vz_cs_rms_R1_2": 0.028061318857730277
+    },
+    {
+      "orbit": 70,
+      "time_P0": 70.00083214121076,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 59,
+      "vz_cs_rms_R1_2": 0.02960731459977259
+    },
+    {
+      "orbit": 71,
+      "time_P0": 71.00024560635633,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 60,
+      "vz_cs_rms_R1_2": 0.03059300865281102
+    },
+    {
+      "orbit": 72,
+      "time_P0": 72.00058217017181,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 61,
+      "vz_cs_rms_R1_2": 0.030992668852401633
+    },
+    {
+      "orbit": 73,
+      "time_P0": 73.00087098750437,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 62,
+      "vz_cs_rms_R1_2": 0.03369231114573447
+    },
+    {
+      "orbit": 74,
+      "time_P0": 74.00030036814424,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 63,
+      "vz_cs_rms_R1_2": 0.03218169039701006
+    },
+    {
+      "orbit": 75,
+      "time_P0": 75.00062101646542,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 64,
+      "vz_cs_rms_R1_2": 0.03288341660327628
+    },
+    {
+      "orbit": 76,
+      "time_P0": 76.00003448161097,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 65,
+      "vz_cs_rms_R1_2": 0.036959908370568846
+    },
+    {
+      "orbit": 77,
+      "time_P0": 77.00033921443784,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 66,
+      "vz_cs_rms_R1_2": 0.039041811482927735
+    },
+    {
+      "orbit": 78,
+      "time_P0": 78.00064394726472,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 67,
+      "vz_cs_rms_R1_2": 0.04117559914876316
+    },
+    {
+      "orbit": 79,
+      "time_P0": 79.00007332790459,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 68,
+      "vz_cs_rms_R1_2": 0.04077723334593337
+    },
+    {
+      "orbit": 80,
+      "time_P0": 80.00037806073145,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 69,
+      "vz_cs_rms_R1_2": 0.04610219501358424
+    },
+    {
+      "orbit": 81,
+      "time_P0": 81.00068279355833,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 70,
+      "vz_cs_rms_R1_2": 0.047264868506857065
+    },
+    {
+      "orbit": 82,
+      "time_P0": 82.00009625870389,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 71,
+      "vz_cs_rms_R1_2": 0.05003729563980493
+    },
+    {
+      "orbit": 83,
+      "time_P0": 83.00038507603645,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 72,
+      "vz_cs_rms_R1_2": 0.0513893554179671
+    },
+    {
+      "orbit": 84,
+      "time_P0": 84.00068980886333,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 73,
+      "vz_cs_rms_R1_2": 0.05209350981409432
+    },
+    {
+      "orbit": 85,
+      "time_P0": 85.00010327400888,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 74,
+      "vz_cs_rms_R1_2": 0.05465342092010555
+    },
+    {
+      "orbit": 86,
+      "time_P0": 86.00039209134144,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 75,
+      "vz_cs_rms_R1_2": 0.05568780241051125
+    },
+    {
+      "orbit": 87,
+      "time_P0": 87.000680908674,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 76,
+      "vz_cs_rms_R1_2": 0.05657501592181205
+    },
+    {
+      "orbit": 88,
+      "time_P0": 88.00004662733663,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 77,
+      "vz_cs_rms_R1_2": 0.058670344018031236
+    },
+    {
+      "orbit": 89,
+      "time_P0": 89.00035136016349,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 78,
+      "vz_cs_rms_R1_2": 0.0601977182757817
     }
   ],
-  "last_orbit": 46
+  "last_orbit": 89
 }
