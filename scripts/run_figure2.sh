@@ -15,9 +15,9 @@ else
   restart=$(find "$run" -maxdepth 1 -name 'vsi.[0-9][0-9][0-9][0-9][0-9].rst' -print | sort | tail -n1)
 fi
 if [[ -n "$restart" ]]; then
-  next_output=$(python3 "$project/scripts/restart_next_output.py" "$restart")
+  output_anchor=$(python3 "$project/scripts/restart_next_output.py" "$restart")
   "$project/bin/athena" -r "$restart" -d "$run" time/nlim=-1 time/tlim=3141.592653589793 \
-    output1/dt=6.283185307179586 output1/next_time="$next_output"
+    output1/dt=6.283185307179586 output1/next_time="$output_anchor"
 else
   "$project/bin/athena" -i "$project/inputs/athinput.figure2" -d "$run"
 fi

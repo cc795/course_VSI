@@ -1,0 +1,118 @@
+{
+  "seconds_per_snapshot": 1,
+  "frames": [
+    {
+      "orbit": 0,
+      "time_P0": 0.0,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 0,
+      "vz_cs_rms_R1_2": 0.005776775053225756
+    },
+    {
+      "orbit": 1,
+      "time_P0": 1.0007724892046186,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 1,
+      "vz_cs_rms_R1_2": 0.013556464015645772
+    },
+    {
+      "orbit": 2,
+      "time_P0": 2.000146324769345,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 2,
+      "vz_cs_rms_R1_2": 0.011673589484841268
+    },
+    {
+      "orbit": 3,
+      "time_P0": 3.0005688322541046,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 3,
+      "vz_cs_rms_R1_2": 0.005679605361912113
+    },
+    {
+      "orbit": 4,
+      "time_P0": 4.000228987561454,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 4,
+      "vz_cs_rms_R1_2": 0.002678709711982333
+    },
+    {
+      "orbit": 5,
+      "time_P0": 5.00031726966572,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 5,
+      "vz_cs_rms_R1_2": 0.0030589717409781115
+    },
+    {
+      "orbit": 6,
+      "time_P0": 6.000699988414707,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 6,
+      "vz_cs_rms_R1_2": 0.00287991587855047
+    },
+    {
+      "orbit": 7,
+      "time_P0": 7.000477918379945,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 7,
+      "vz_cs_rms_R1_2": 0.003300717808924203
+    },
+    {
+      "orbit": 8,
+      "time_P0": 8.000873369524378,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 8,
+      "vz_cs_rms_R1_2": 0.003399501435308332
+    },
+    {
+      "orbit": 9,
+      "time_P0": 9.000374369888636,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 9,
+      "vz_cs_rms_R1_2": 0.0035116498826471883
+    },
+    {
+      "orbit": 10,
+      "time_P0": 10.000055215338586,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 10,
+      "vz_cs_rms_R1_2": 0.004264580869770598
+    },
+    {
+      "orbit": 11,
+      "time_P0": 11.000000257994069,
+      "directory": "/workspace/course_VSI/results/movie_early",
+      "snapshot_number": 11,
+      "vz_cs_rms_R1_2": 0.004247459432067078
+    },
+    {
+      "orbit": 12,
+      "time_P0": 12.00004397671427,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 1,
+      "vz_cs_rms_R1_2": 0.004635502176087702
+    },
+    {
+      "orbit": 13,
+      "time_P0": 12.99999856866634,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 2,
+      "vz_cs_rms_R1_2": 0.00485501774501881
+    },
+    {
+      "orbit": 14,
+      "time_P0": 14.000090033869467,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 3,
+      "vz_cs_rms_R1_2": 0.005268560842513957
+    },
+    {
+      "orbit": 15,
+      "time_P0": 15.000276992038453,
+      "directory": "/workspace/course_VSI/results/figure2",
+      "snapshot_number": 4,
+      "vz_cs_rms_R1_2": 0.004939964167204823
+    }
+  ],
+  "last_orbit": 15
+}
