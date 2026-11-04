@@ -87,8 +87,10 @@ python3 scripts/make_movie.py
 
 该命令合并 `results/movie_early/` 和 `results/figure2/` 的快照，严格按 0,1,2,… 选取连续序列，遇到缺帧即停止，不跳过时刻。前期补算与主模拟使用相同初始条件及数值方法，主模拟在约 10P0 有一次重启，两段不是完全相同的逐步浮点轨迹。视频不是时间插值，也不是把论文图像变形得到。
 
-输出为 `results/movie_figure2/figure2_evolution.mp4`；每个快照持续 0.25 秒，H.264、1440×960、24 fps；采用深色背景、青蓝—洋红带符号对数色标，所有帧保持同一色标与坐标范围。仅保留流场主面板，标题显示整数轨道时刻，实际输出时间仍记录在元数据中。`movie_metadata.json` 记录每帧实际模拟时间与数据来源。PNG 与单帧 MP4 会缓存，重运行时只渲染新增快照并更新视频。
+输出为 `results/movie_figure2/figure2_evolution.mp4`；每个快照持续 0.25 秒，H.264、1440×960、24 fps；采用深色背景、青蓝—正红带符号对数色标，所有帧保持同一色标与坐标范围。仅保留流场主面板，标题显示整数轨道时刻，实际输出时间仍记录在元数据中。`movie_metadata.json` 记录每帧实际模拟时间与数据来源。PNG 与单帧 MP4 会缓存，重运行时只渲染新增快照并更新视频。
 
 `python3 scripts/watch_movie.py` 可持续监测新数据并自动更新视频，直到最后一个 500P0 快照合成成功。当前监测进程已经在云环境中启动，进程不会保证随环境休眠保留。
 
-仓库中的 [`media/figure2_evolution.mp4`](media/figure2_evolution.mp4) 是已上传的 **0–19 P0** 视频（20 个时刻，每帧 0.25 秒）；对应真实时间记录见 `media/movie_metadata.json`。云端 `results/movie_figure2/figure2_evolution.mp4` 会随新数据继续更新；GitHub 中的版本需要再次提交才会更新。500P0 的计算尚未完成。
+仓库中的 [`media/figure2_evolution.mp4`](media/figure2_evolution.mp4) 是已上传的 **0–23 P0** 视频（24 个时刻，每帧 0.25 秒）；对应真实时间记录见 `media/movie_metadata.json`。云端 `results/movie_figure2/figure2_evolution.mp4` 会随新数据继续更新；GitHub 中的版本需要再次提交才会更新。500P0 的计算尚未完成。
+
+图像和视频的标题、刻度及公式统一使用 Times 风格；当前云环境采用 Times 兼容的 Nimbus Roman。若系统安装了 Times New Roman，字体配置会优先使用它。

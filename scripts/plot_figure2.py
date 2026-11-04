@@ -10,6 +10,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import SymLogNorm
+from plot_style import configure_times
+configure_times()
 
 def load(directory, number):
     files=sorted(glob.glob(str(Path(directory)/f'vsi.block*.out1.{number:05d}.vtk')))

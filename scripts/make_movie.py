@@ -40,7 +40,7 @@ def render(directory,number,time,n,png):
     w=(v[...,0]*np.cos(tt)-v[...,1]*np.sin(tt))/cs
     background='#080d1c'
     cmap=LinearSegmentedColormap.from_list('neon_diverging',
-       ['#00f0ff','#007acc','#193b74',background,'#58235f','#d5299b','#ff5a9e'])
+       ['#00f0ff','#007acc','#193b74',background,'#57151c','#c91d25','#ff0000'])
     fig=plt.figure(figsize=(12,8),dpi=120,facecolor=background)
     gs=fig.add_gridspec(2,1,height_ratios=[.045,1],left=.10,right=.95,bottom=.11,top=.82,hspace=.22)
     ax=fig.add_subplot(gs[1,0],facecolor=background)
@@ -70,8 +70,8 @@ def main():
     data=discover()
     if not data or len(data)-1<a.min_last: raise ValueError(f'Only {len(data)} contiguous snapshots available')
     out=root/'results/movie_figure2';out.mkdir(exist_ok=True)
-    frames=out/'frames_neon_v2';frames.mkdir(exist_ok=True)
-    clips=out/'clips_neon_v2_fast';clips.mkdir(exist_ok=True)
+    frames=out/'frames_neon_times_red_v4';frames.mkdir(exist_ok=True)
+    clips=out/'clips_neon_times_red_v4_fast';clips.mkdir(exist_ok=True)
     metadata=[]
     for n,(directory,number,time) in enumerate(data):
         png=frames/f'frame_{n:04d}.png';clip=clips/f'clip_{n:04d}.mp4';meta=frames/f'frame_{n:04d}.json'
@@ -84,6 +84,6 @@ def main():
     tmp=out/'figure2_evolution.tmp.mp4';target=out/'figure2_evolution.mp4'
     subprocess.run(['ffmpeg','-v','error','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy','-movflags','+faststart',str(tmp)],check=True)
     os.replace(tmp,target)
-    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':0.25,'style':'neon_single_panel_v2','frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
+    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':0.25,'style':'neon_single_panel_times_red_v4','frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
     print(f'{target}: orbits 0..{len(data)-1}, duration {len(data)*.25:g} seconds',flush=True)
 if __name__=='__main__': main()
