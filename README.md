@@ -12,7 +12,7 @@ Use this problem generator with the official [Athena++ code](https://github.com/
 /path/to/athena/bin/athena -i /path/to/course_VSI/inputs/athinput.figure2
 ```
 
-## [implementation guide (PDF)](https://github.com/cc795/course_VSI/blob/main/readme.pdf)
+## [Implementation guide (PDF)](https://github.com/cc795/course_VSI/blob/main/readme.pdf)
 
 ## Physical setup
 
