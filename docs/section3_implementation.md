@@ -933,26 +933,30 @@ $$
 下面按输入文件的原顺序解释每一项。尖括号包围的块标题（例如 `<mesh>`）开始一个参数块，直到下一个块标题；同名参数在不同块中的含义可以不同，例如 `<mesh>` 的 `nx1` 是总网格数，`<meshblock>` 的 `nx1` 是单块网格数。下面所有时间值均为代码单位，$GM=R_0=1$ 时 $P_0=2\pi$。
 
 
-## 1. comment 和 job（第 1–4 行）
+## 1. comment 和 job（第 1–8 行）
 
 \begin{Verbatim}[numbers=left,firstnumber=1,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <comment>
 problem = Svanberg et al. 2022, Section 3, Figure 2
+
+
 <job>
 problem_id = vsi
+
+
 \end{Verbatim}
 
 
 - 第 1 行 `<comment>`：开始描述块。
 - 第 2 行 `problem=...`：问题说明文字，不参与动力学计算，也不会自动载入论文参数。
-- 第 3 行 `<job>`：开始任务命名块。
-- 第 4 行 `problem_id=vsi`：输出文件的基础名称为 `vsi`，不改变物理初态。
+- 第 5 行 `<job>`：开始任务命名块。
+- 第 6 行 `problem_id=vsi`：输出文件的基础名称为 `vsi`，不改变物理初态。
 
 
 
-## 2. time：步长控制与终止时间（第 5–11 行）
+## 2. time：步长控制与终止时间（第 9–17 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=5,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=9,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <time>
 cfl_number = 0.3
 nlim = -1
@@ -960,22 +964,24 @@ tlim = 3141.592653589793
 integrator = vl2
 xorder = 2
 ncycle_out = 100
+
+
 \end{Verbatim}
 
 
-- 第 5 行 `<time>`：开始时间控制块。
-- 第 6 行 `cfl_number=0.3`：控制流体 CFL 步长的安全系数，不表示固定时间步长为 0.3。
-- 第 7 行 `nlim=-1`：不设置最大步数限制。
-- 第 8 行 `tlim=3141.592653589793`：$500\times2\pi=500P_0$，即 Figure 2 的目标时刻。论文整段 $3000P_0$ 对应 $18849.55592153876$，不是这里当前的值。
-- 第 9 行 `integrator=vl2`：采用两阶段、二阶时间精度的 van Leer 时间积分。
-- 第 10 行 `xorder=2`：采用二阶空间重构，在这里对应 PLM。
-- 第 11 行 `ncycle_out=100`：每 100 个流体步在标准输出打印一次循环信息；不是每 100 步保存一次完整快照。
+- 第 9 行 `<time>`：开始时间控制块。
+- 第 10 行 `cfl_number=0.3`：控制流体 CFL 步长的安全系数，不表示固定时间步长为 0.3。
+- 第 11 行 `nlim=-1`：不设置最大步数限制。
+- 第 12 行 `tlim=3141.592653589793`：$500\times2\pi=500P_0$，即 Figure 2 的目标时刻。论文整段 $3000P_0$ 对应 $18849.55592153876$，不是这里当前的值。
+- 第 13 行 `integrator=vl2`：采用两阶段、二阶时间精度的 van Leer 时间积分。
+- 第 14 行 `xorder=2`：采用二阶空间重构，在这里对应 PLM。
+- 第 15 行 `ncycle_out=100`：每 100 个流体步在标准输出打印一次循环信息；不是每 100 步保存一次完整快照。
 
 
 
-## 3. mesh：整个计算域（第 12–29 行）
+## 3. mesh：整个计算域（第 18–37 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=12,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=18,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <mesh>
 nx1 = 704
 x1min = 1.0
@@ -994,73 +1000,79 @@ x3max = 6.283185307179586
 ix3_bc = periodic
 ox3_bc = periodic
 num_threads = 4
+
+
 \end{Verbatim}
 
 
-- 第 12 行 `<mesh>`：整个网格的参数块。
-- 第 13 行 `nx1=704`：径向活动单元总数为 704。
-- 第 14 行 `x1min=1.0`：球半径内边界 $r=1$。
-- 第 15 行 `x1max=30.0`：球半径外边界 $r=30$。
-- 第 16 行 `x1rat=1.005`：相邻径向单元宽度之比为 1.005；端点保持为 1 和 30。对应单元面可写为 $r_i=1+29(q^i-1)/(q^{704}-1)$，$q=1.005$。
-- 第 17 行 `ix1_bc=user`：径向内边界调用 `DiskInnerX1()`。
-- 第 18 行 `ox1_bc=user`：径向外边界调用 `DiskOuterX1()`。
-- 第 19 行 `nx2=448`：极角方向活动单元总数为 448。
-- 第 20 行 `x2min=1.3207963267948966`：极角内边界 $\pi/2-5h$，其中 $h=0.05$。
-- 第 21 行 `x2max=1.8207963267948966`：极角外边界 $\pi/2+5h$。这些角度使用弧度。
-- 第 22 行 `ix2_bc=user`：极角内边界调用 `DiskInnerX2()`。
-- 第 23 行 `ox2_bc=user`：极角外边界调用 `DiskOuterX2()`。
-- 第 24 行 `nx3=1`：只有一个方位角单元，不解析方位角变化；仍然演化方位速度与动量。
-- 第 25 行 `x3min=0.0`：方位角坐标起点为 0。
-- 第 26 行 `x3max=6.283185307179586`：方位角坐标终点为 $2\pi$。
-- 第 27 行 `ix3_bc=periodic`：方位角内边界为周期条件，不调用 `DiskInnerX3()`。
-- 第 28 行 `ox3_bc=periodic`：方位角外边界为周期条件，不调用 `DiskOuterX3()`。
-- 第 29 行 `num_threads=4`：设置网格处理使用的 OpenMP 线程数为 4；需配合启用 OpenMP 的可执行程序。
+- 第 18 行 `<mesh>`：整个网格的参数块。
+- 第 19 行 `nx1=704`：径向活动单元总数为 704。
+- 第 20 行 `x1min=1.0`：球半径内边界 $r=1$。
+- 第 21 行 `x1max=30.0`：球半径外边界 $r=30$。
+- 第 22 行 `x1rat=1.005`：相邻径向单元宽度之比为 1.005；端点保持为 1 和 30。对应单元面可写为 $r_i=1+29(q^i-1)/(q^{704}-1)$，$q=1.005$。
+- 第 23 行 `ix1_bc=user`：径向内边界调用 `DiskInnerX1()`。
+- 第 24 行 `ox1_bc=user`：径向外边界调用 `DiskOuterX1()`。
+- 第 25 行 `nx2=448`：极角方向活动单元总数为 448。
+- 第 26 行 `x2min=1.3207963267948966`：极角内边界 $\pi/2-5h$，其中 $h=0.05$。
+- 第 27 行 `x2max=1.8207963267948966`：极角外边界 $\pi/2+5h$。这些角度使用弧度。
+- 第 28 行 `ix2_bc=user`：极角内边界调用 `DiskInnerX2()`。
+- 第 29 行 `ox2_bc=user`：极角外边界调用 `DiskOuterX2()`。
+- 第 30 行 `nx3=1`：只有一个方位角单元，不解析方位角变化；仍然演化方位速度与动量。
+- 第 31 行 `x3min=0.0`：方位角坐标起点为 0。
+- 第 32 行 `x3max=6.283185307179586`：方位角坐标终点为 $2\pi$。
+- 第 33 行 `ix3_bc=periodic`：方位角内边界为周期条件，不调用 `DiskInnerX3()`。
+- 第 34 行 `ox3_bc=periodic`：方位角外边界为周期条件，不调用 `DiskOuterX3()`。
+- 第 35 行 `num_threads=4`：设置网格处理使用的 OpenMP 线程数为 4；需配合启用 OpenMP 的可执行程序。
 
 输入未写 `x2rat`，因此采用默认值 1，极角均匀划分。极角跨度 $0.5=10h$，448 格在中面附近对应约 44.8 格/H，与论文文字中的约 12 格/H 不一致；这里实际执行的是明确列出的范围和 448 格。也没有另外设置“10 格/H”的参数来覆盖径向网格。
 
 
 
-## 4. meshblock：单个网格块（第 30–33 行）
+## 4. meshblock：单个网格块（第 38–43 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=30,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=38,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <meshblock>
 nx1 = 176
 nx2 = 448
 nx3 = 1
+
+
 \end{Verbatim}
 
 
-- 第 30 行 `<meshblock>`：开始单块网格配置。
-- 第 31 行 `nx1=176`：每块有 176 个径向活动单元。
-- 第 32 行 `nx2=448`：每块覆盖全部 448 个极角活动单元。
-- 第 33 行 `nx3=1`：每块只有一个方位角活动单元。
+- 第 38 行 `<meshblock>`：开始单块网格配置。
+- 第 39 行 `nx1=176`：每块有 176 个径向活动单元。
+- 第 40 行 `nx2=448`：每块覆盖全部 448 个极角活动单元。
+- 第 41 行 `nx3=1`：每块只有一个方位角活动单元。
 
 总块数为 $(704/176)(448/448)(1/1)=4$。网格分块用于计算组织，没有改变总分辨率；幽灵单元不计入上述活动单元数。
 
 
 
-## 5. hydro：状态方程与底限（第 34–37 行）
+## 5. hydro：状态方程与底限（第 44–49 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=34,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=44,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <hydro>
 gamma = 1.4
 dfloor = 1.e-12
 pfloor = 1.e-16
+
+
 \end{Verbatim}
 
 
-- 第 34 行 `<hydro>`：开始流体参数块。
-- 第 35 行 `gamma=1.4`：$\gamma=7/5$，用于 $P=(\gamma-1)\epsilon$。`InitUserMeshData()` 读取为 `gamma_gas`，初始化能量和冷却都使用它。
-- 第 36 行 `dfloor=1.e-12`：密度数值底限。`DenProfileCyl()` 返回值也通过该底限截断。
-- 第 37 行 `pfloor=1.e-16`：压强数值底限，由流体状态处理使用；本文件没有把它读成另一个独立全局变量。
+- 第 44 行 `<hydro>`：开始流体参数块。
+- 第 45 行 `gamma=1.4`：$\gamma=7/5$，用于 $P=(\gamma-1)\epsilon$。`InitUserMeshData()` 读取为 `gamma_gas`，初始化能量和冷却都使用它。
+- 第 46 行 `dfloor=1.e-12`：密度数值底限。`DenProfileCyl()` 返回值也通过该底限截断。
+- 第 47 行 `pfloor=1.e-16`：压强数值底限，由流体状态处理使用；本文件没有把它读成另一个独立全局变量。
 
 底限用于数值保护，不是额外的密度或温度幂律。
 
 
 
-## 6. problem：盘模型、噪声与冷却（第 38–47 行）
+## 6. problem：盘模型、噪声与冷却（第 50–61 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=38,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=50,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <problem>
 GM = 1.0
 r0 = 1.0
@@ -1071,71 +1083,77 @@ dslope = -2.0
 noise_amp = 0.01
 seed = 202211
 tau = 6.283185307179586e-10
+
+
 \end{Verbatim}
 
 
-- 第 38 行 `<problem>`：开始问题生成器参数块。
-- 第 39 行 `GM=1.0`：中心引力参数。既用于本文件的解析平衡，也启用内置点质量引力；本文件没有再手写一次重复引力。
-- 第 40 行 `r0=1.0`：柱半径参考位置 $R_0=1$。
-- 第 41 行 `rho0=1.0`：$R=R_0$ 的中面密度归一化为 1。
-- 第 42 行 `p0_over_r0=0.0025`：目标 $P/\rho$ 在参考半径的值，即 $c_0^2$；对应 $c_0=0.05$，不是 $c_0=0.0025$。
-- 第 43 行 `pslope=-1.0`：$c_s^2\propto R^{-1}$，对应论文 $q_T=1$。
-- 第 44 行 `dslope=-2.0`：中面密度 $\rho_{\rm mid}\propto R^{-2}$，对应论文 $q_D=2$。
-- 第 45 行 `noise_amp=0.01`：每个速度分量噪声的最大绝对幅度为局部声速的 1%，由第 170–172 行乘入动量增量。
-- 第 46 行 `seed=202211`：散列噪声的种子，决定可重复的初始扰动。
-- 第 47 行 `tau=6.283185307179586e-10`：$10^{-10}P_0$ 换算后的代码冷却时间，不是 $10^{-10}$ 代码时间。
+- 第 50 行 `<problem>`：开始问题生成器参数块。
+- 第 51 行 `GM=1.0`：中心引力参数。既用于本文件的解析平衡，也启用内置点质量引力；本文件没有再手写一次重复引力。
+- 第 52 行 `r0=1.0`：柱半径参考位置 $R_0=1$。
+- 第 53 行 `rho0=1.0`：$R=R_0$ 的中面密度归一化为 1。
+- 第 54 行 `p0_over_r0=0.0025`：目标 $P/\rho$ 在参考半径的值，即 $c_0^2$；对应 $c_0=0.05$，不是 $c_0=0.0025$。
+- 第 55 行 `pslope=-1.0`：$c_s^2\propto R^{-1}$，对应论文 $q_T=1$。
+- 第 56 行 `dslope=-2.0`：中面密度 $\rho_{\rm mid}\propto R^{-2}$，对应论文 $q_D=2$。
+- 第 57 行 `noise_amp=0.01`：每个速度分量噪声的最大绝对幅度为局部声速的 1%，由第 170–172 行乘入动量增量。
+- 第 58 行 `seed=202211`：散列噪声的种子，决定可重复的初始扰动。
+- 第 59 行 `tau=6.283185307179586e-10`：$10^{-10}P_0$ 换算后的代码冷却时间，不是 $10^{-10}$ 代码时间。
 
 这些参数给出 $h^2=c_s^2/(GM/R)=0.0025$，故 $h=0.05$。输入没有单独的 `h` 字段；它已由声速、引力与径向幂律组合确定。
 
 
 
-## 7. output1：完整流场快照（第 48–51 行）
+## 7. output1：完整流场快照（第 62–67 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=48,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=62,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <output1>
 file_type = vtk
 variable = prim
 dt = 6.283185307179586
+
+
 \end{Verbatim}
 
 
-- 第 48 行 `<output1>`：第一组输出配置。
-- 第 49 行 `file_type=vtk`：以 VTK 格式保存空间场。
-- 第 50 行 `variable=prim`：保存原始流体变量，包括密度、压强与速度；不是只保存二维图片。
-- 第 51 行 `dt=6.283185307179586`：输出间隔 $2\pi=1P_0$。
+- 第 62 行 `<output1>`：第一组输出配置。
+- 第 63 行 `file_type=vtk`：以 VTK 格式保存空间场。
+- 第 64 行 `variable=prim`：保存原始流体变量，包括密度、压强与速度；不是只保存二维图片。
+- 第 65 行 `dt=6.283185307179586`：输出间隔 $2\pi=1P_0$。
 
 这里的 `dt` 是该输出块的采样间隔，不是 `<time>` 控制的流体积分步长。常规输出在首个达到或跨过计划时刻的步写出，所以准确输出时间需读取文件头。
 
 
 
-## 8. output2：检查点（第 52–54 行）
+## 8. output2：检查点（第 68–72 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=52,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=68,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <output2>
 file_type = rst
 dt = 62.83185307179586
+
+
 \end{Verbatim}
 
 
-- 第 52 行 `<output2>`：第二组输出配置。
-- 第 53 行 `file_type=rst`：保存可供重启的检查点，而非可视化快照。
-- 第 54 行 `dt=62.83185307179586`：间隔 $20\pi=10P_0$。
+- 第 68 行 `<output2>`：第二组输出配置。
+- 第 69 行 `file_type=rst`：保存可供重启的检查点，而非可视化快照。
+- 第 70 行 `dt=62.83185307179586`：间隔 $20\pi=10P_0$。
 
 这与 VTK 的用途不同：检查点保存继续积分需要的状态。
 
 
 
-## 9. output3：history（第 55–57 行）
+## 9. output3：history（第 73–75 行）
 
-\begin{Verbatim}[numbers=left,firstnumber=55,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
+\begin{Verbatim}[numbers=left,firstnumber=73,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 <output3>
 file_type = hst
 dt = 0.6283185307179586
 \end{Verbatim}
 
 
-- 第 55 行 `<output3>`：第三组输出配置。
-- 第 56 行 `file_type=hst`：保存 history 时间序列，例如积分量。
-- 第 57 行 `dt=0.6283185307179586`：间隔 $0.2\pi=0.1P_0$。
+- 第 73 行 `<output3>`：第三组输出配置。
+- 第 74 行 `file_type=hst`：保存 history 时间序列，例如积分量。
+- 第 75 行 `dt=0.6283185307179586`：间隔 $0.2\pi=0.1P_0$。
 
 history 不保存每个空间单元的完整流场，不能代替 VTK 快照。

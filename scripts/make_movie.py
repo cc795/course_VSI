@@ -63,7 +63,10 @@ def render(directory,number,time,n,png):
             'vz_cs_rms_R1_2':float(np.sqrt(np.mean(w[(R>=1)&(R<=2)]**2)))}
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--min-last',type=int,default=0);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--min-last',type=int,default=0)
+    p.add_argument('--duration',type=float,default=40.0,help='Total movie duration in seconds')
+    a=p.parse_args()
+    if not np.isfinite(a.duration) or a.duration<=0: p.error('--duration must be positive and finite')
     lock_dir=root/'results/movie_figure2';lock_dir.mkdir(exist_ok=True)
     lock=(lock_dir/'.movie.lock').open('w')
     fcntl.flock(lock,fcntl.LOCK_EX)
@@ -88,7 +91,15 @@ def main():
     concat=out/'clips.txt';concat.write_text(''.join(f"file '{clips/f'clip_{n:04d}.mp4'}'\n" for n in range(len(data))))
     tmp=out/'figure2_evolution.tmp.mp4';target=out/'figure2_evolution.mp4'
     subprocess.run(['ffmpeg','-v','error','-xerror','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy','-movflags','+faststart',str(tmp)],check=True)
-    os.replace(tmp,target)
-    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':0.125,'style':'neon_single_panel_times_red_v4','frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
-    print(f'{target}: orbits 0..{len(data)-1}, duration {len(data)*.125:g} seconds',flush=True)
+    retimed=out/'figure2_evolution.retimed.tmp.mp4'
+    speed=a.duration/(len(data)*.125)
+    filters=f'setpts={speed:.17g}*(PTS-STARTPTS),tpad=stop_mode=clone:stop_duration=1,fps=30'
+    subprocess.run(['ffmpeg','-v','error','-xerror','-y','-i',str(tmp),'-vf',filters,
+                    '-t',str(a.duration),'-an','-c:v','libx264','-threads','2',
+                    '-crf','18','-preset','fast','-pix_fmt','yuv420p',
+                    '-movflags','+faststart',str(retimed)],check=True)
+    os.replace(retimed,target)
+    tmp.unlink()
+    (out/'movie_metadata.json').write_text(json.dumps({'seconds_per_snapshot':a.duration/len(data),'duration_seconds':a.duration,'video_fps':30,'timing_note':'seconds_per_snapshot is the mean display duration; actual holds are quantized to video frames.','style':'neon_single_panel_times_red_v4','frames':metadata,'last_orbit':len(data)-1},indent=2)+'\n')
+    print(f'{target}: orbits 0..{len(data)-1}, duration {a.duration:g} seconds',flush=True)
 if __name__=='__main__': main()
