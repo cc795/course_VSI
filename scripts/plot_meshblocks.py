@@ -56,7 +56,10 @@ def main():
     fig.suptitle('MeshBlock layout',color=ink,fontsize=24,y=.985)
     fig.text(.53,.93,f'{nr} × {nt} active cells   |   {len(bounds)-1} MeshBlocks   |   adjacent radial cell-width ratio {q}',ha='center',color=muted,fontsize=12)
     fig.text(.53,.025,'Cell lines in the physical view are sampled every 8 radial and 16 polar cells for readability.',ha='center',color=muted,fontsize=10)
-    for ext in ['png','svg','pdf']:fig.savefig(root/'media'/f'meshblocks.{ext}',facecolor=bg)
+    for ext in ['png','svg','pdf']:
+        path=root/'media'/f'meshblocks.{ext}'
+        fig.savefig(path,facecolor=bg)
+        if ext=='svg':path.write_text('\n'.join(line.rstrip() for line in path.read_text().splitlines())+'\n')
     plt.close(fig)
     (root/'media/meshblocks.json').write_text(json.dumps({'mesh':[nr,nt,1],'meshblock':[br,bt,1],'radial_block_boundaries':bounds.tolist(),'source_input':'inputs/athinput.figure2'},indent=2)+'\n')
     print('Radial block boundaries:',bounds.tolist())
