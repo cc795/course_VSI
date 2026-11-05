@@ -1,0 +1,20 @@
+{
+  "mesh": [
+    704,
+    448,
+    1
+  ],
+  "meshblock": [
+    176,
+    448,
+    1
+  ],
+  "radial_block_boundaries": [
+    1.0,
+    2.254653647432799,
+    5.2728724662525455,
+    12.533557402623074,
+    30.0
+  ],
+  "source_input": "inputs/athinput.figure2"
+}

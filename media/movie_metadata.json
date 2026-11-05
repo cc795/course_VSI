@@ -3,7 +3,19 @@
   "duration_seconds": 40.0,
   "video_fps": 30,
   "timing_note": "seconds_per_snapshot is the mean display duration; actual holds are quantized to video frames.",
-  "style": "neon_single_panel_times_red_v4",
+  "style": "neon_full_domain_times_red_v5",
+  "spherical_radial_domain": [
+    1,
+    30
+  ],
+  "plot_R_limits": [
+    0.95,
+    30
+  ],
+  "plot_z_limits": [
+    -8,
+    8
+  ],
   "frames": [
     {
       "orbit": 0,

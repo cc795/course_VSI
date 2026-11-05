@@ -10,6 +10,23 @@ colorlinks: true
 header-includes:
   - |
     \usepackage{fvextra}
+    \usepackage{mdframed}
+    \usepackage{needspace}
+    \definecolor{CodeBackground}{HTML}{EEF7FD}
+    \definecolor{CodeBorder}{HTML}{D0E5F3}
+    \definecolor{CodeText}{HTML}{20344B}
+    \definecolor{CodeLine}{HTML}{6A8297}
+    \mdfdefinestyle{codebox}{backgroundcolor=CodeBackground,
+      linecolor=CodeBorder,linewidth=0.4pt,roundcorner=3pt,
+      innerleftmargin=25pt,innerrightmargin=7pt,
+      innertopmargin=7pt,innerbottommargin=7pt,
+      skipabove=6pt,skipbelow=9pt}
+    \BeforeBeginEnvironment{Verbatim}{\Needspace{7\baselineskip}\begin{mdframed}[style=codebox]}
+    \AfterEndEnvironment{Verbatim}{\end{mdframed}}
+    \AtBeginEnvironment{Verbatim}{\color{CodeText}}
+    \renewcommand{\theFancyVerbLine}{\color{CodeLine}\scriptsize\arabic{FancyVerbLine}}
+    \pretocmd{\subsection}{\Needspace{9\baselineskip}}{}{}
+    \setlength{\parskip}{4pt}
     \XeTeXlinebreaklocale "zh"
     \XeTeXlinebreakskip=0pt plus 1pt
     \setlength{\emergencystretch}{3em}
@@ -302,18 +319,6 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
 第 158 行保存密度，第 159 行把径向动量先设为 0。第 160–166 行按坐标系选择旋转分量：柱坐标时方位动量在 `IM2`；球坐标时在 `IM3`。当前执行第 164–165 行，得到 $m_\theta=0$、$m_\phi=\rho v_\phi$。
 
-第 169 行由 $P/\rho$ 开方取得局部等温声速。第 170–172 行分别向三个动量加上
-
-$$
-\delta m_a=\rho\,(0.01)c_s\,\xi_a,\qquad -1\leq\xi_a<1.
-$$
-
-`den*` 是必要的，因为 `u(IM*)` 保存动量密度，不是速度。参数 0、1、2 区分三个噪声分量。球坐标运行时噪声用 `x1=r`、`x2=theta` 作坐标键。
-
-第 173–177 行设置总能量：先用 $P=\rho c_s^2$ 计算内能 $\epsilon=P/(\gamma-1)$，再加上三个动量给出的动能 $K=|\mathbf m|^2/(2\rho)$。此时动量已经包含噪声，所以能量也包含扰动动能。第 179–184 行结束循环与函数。噪声仅在初始化时加入，不在这里持续驱动。
-
-
-
 ## 6. GetCylCoord：把网格坐标转换为 R、phi、z（第 185–201 行）
 
 \begin{Verbatim}[numbers=left,firstnumber=185,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
@@ -385,7 +390,7 @@ $$
 
 
 
-## 8. PoverR：局部目标声速平方（第 215–223 行）
+## 8. PoverR 声速（第 215–223 行）
 
 \begin{Verbatim}[numbers=left,firstnumber=215,numbersep=6pt,fontsize=\footnotesize,breaklines=true,breakanywhere=true]
 
@@ -404,7 +409,7 @@ Real PoverR(const Real rad, const Real phi, const Real z) {
 
 $$
 \frac P\rho=c_s^2(R)
-=\mathrm{p0\_over\_r0}(R/r_0)^{\mathrm{pslope}}.
+=c_0^2(R/R_0)^{-q_T}.
 $$
 
 本输入给出 `p0_over_r0=0.0025`、`r0=1`、`pslope=-1`，所以返回 $0.0025/R$。第 222 行返回该值。它不是声速；需要声速时再开平方。`phi` 和 `z` 没进入表达式，因此目标温度在给定柱半径上不随高度变化。
@@ -901,10 +906,10 @@ void MeshBlock::UserWorkInLoop() {
 
 第 516 行计算 $f=1-\exp(-\Delta t/\tau)$。`expm1(x)` 返回 $e^x-1$，所以前面的负号得到论文式 (27) 的正松弛系数。`pmy_mesh->dt` 是当前完整步长，不是代码自行设定的额外时间。
 
-第 517 行遍历活动单元；第 518 行从守恒数组读取密度。第 519–520 行使用动量密度计算动能密度：
+第 517 行遍历活动单元；第 518 行从守恒数组读取密度。第 519–520 行使用三个动量密度计算动能密度；代入 `u(IM*)` 保存的 $\rho v$，可写成：
 
 $$
-K=\frac{m_r^2+m_\theta^2+m_\phi^2}{2\rho}.
+K=\frac12\rho\left(v_r^2+v_\theta^2+v_\phi^2\right).
 $$
 
 第 521 行转换单元坐标。第 522 行用当前密度计算目标内能密度：
