@@ -22,7 +22,11 @@ def main():
     for rface in boundaries:ax.plot(rface*np.sin(tf),rface*np.cos(tf),color='black',lw=1.4)
     for theta in [tf[0],tf[-1]]:ax.plot(rf*np.sin(theta),rf*np.cos(theta),color='black',lw=1.4)
     for n,(lo,hi) in enumerate(zip(boundaries[:-1],boundaries[1:])):
-        ax.text(.5*(lo+hi),.5*(lo+hi)*.30,f'B{n}',ha='center',fontsize=13,fontweight='bold')
+        mid=.5*(lo+hi)
+        ax.annotate(f'MeshBlock {n}',xy=(mid,mid*.255),
+                    xytext=([2.4,6,11,22][n],[2.8,3.8,5.4,8.1][n]),
+                    ha='center',fontsize=12,fontweight='bold',
+                    arrowprops={'arrowstyle':'-','color':'black','lw':.8})
     ax.set(xlim=(.95,30),ylim=(-8.5,9.4),xlabel=r'$R/R_0$',ylabel=r'$z/R_0$')
     fig.suptitle(rf'MeshBlocks and flow at $t={time/(2*np.pi):.0f}P_0$',fontsize=22,y=.98)
     colorax=fig.add_axes([.17,.855,.70,.025])
