@@ -1,0 +1,23 @@
+{
+  "example": "stationary_contact_1D_Euler",
+  "grid_cells": 200,
+  "gamma": 1.4,
+  "final_time": 0.05,
+  "CFL": 0.4,
+  "reconstruction": "piecewise constant",
+  "wave_bounds": "common Davis left/right bounds",
+  "HLLE": {
+    "steps": 84,
+    "L1_density_error": 0.014721434400074647,
+    "transition_width_10_90": 0.055,
+    "max_pressure_error": 0.0,
+    "max_velocity": 0.0
+  },
+  "HLLC": {
+    "steps": 84,
+    "L1_density_error": 0.0,
+    "transition_width_10_90": 0.0,
+    "max_pressure_error": 0.0,
+    "max_velocity": 0.0
+  }
+}
