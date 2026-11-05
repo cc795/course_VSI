@@ -36,13 +36,13 @@ def main():
         ax.add_patch(Polygon(poly,facecolor=colors[n%4],edgecolor=colors[n%4],alpha=.25,lw=1.2))
         mid=.5*(lo+hi)
         if n<2:
-            ax.annotate(f'MeshBlock {n}',xy=(mid,mid*.255),xytext=([2.7,7.5][n],[3.7,4.9][n]),
+            ax.annotate(f'Meshblock {n}',xy=(mid,mid*.255),xytext=([2.7,7.5][n],[3.7,4.9][n]),
                         color=ink,ha='center',fontsize=12,fontweight='bold',
                         arrowprops={'arrowstyle':'-','color':ink,'lw':.9})
         else:
-            ax.text(mid,0,f'MeshBlock {n}',color=ink,ha='center',va='center',fontsize=13,fontweight='bold')
+            ax.text(mid,0,f'Meshblock {n}',color=ink,ha='center',va='center',fontsize=13,fontweight='bold')
         bx.add_patch(Rectangle((n*br,0),br,nt,facecolor=colors[n%4],edgecolor=ink,lw=1.3,alpha=.65))
-        bx.text((n+.5)*br,nt/2,f'MeshBlock {n}\n{br} × {bt} cells',color=ink,ha='center',va='center',fontsize=13)
+        bx.text((n+.5)*br,nt/2,f'Meshblock {n}\n{br} × {bt} cells',color=ink,ha='center',va='center',fontsize=13)
     for rr in r[::8]:ax.plot(rr*np.sin(t),rr*np.cos(t),color=muted,lw=.3,alpha=.28)
     for th in t[::16]:ax.plot(r*np.sin(th),r*np.cos(th),color=muted,lw=.3,alpha=.28)
     for rr in bounds:ax.plot(rr*np.sin(t),rr*np.cos(t),color=ink,lw=1.2,alpha=.85)
@@ -56,7 +56,7 @@ def main():
         for spine in panel.spines.values():spine.set_color('#43536D')
         panel.xaxis.label.set_color(ink);panel.yaxis.label.set_color(ink)
         panel.xaxis.label.set_size(13);panel.yaxis.label.set_size(13)
-    handles=[Patch(facecolor=c,label=f'MeshBlock {n}: r = {bounds[n]:.3f}–{bounds[n+1]:.3f}') for n,c in enumerate(colors)]
+    handles=[Patch(facecolor=c,label=f'Meshblock {n}: r = {bounds[n]:.3f}–{bounds[n+1]:.3f}') for n,c in enumerate(colors)]
     legend=fig.legend(handles=handles,loc='upper center',bbox_to_anchor=(.53,.91),ncol=4,frameon=False,fontsize=10)
     for text in legend.get_texts():text.set_color(ink)
     fig.suptitle('MeshBlock layout',color=ink,fontsize=24,y=.985)
